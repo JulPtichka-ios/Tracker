@@ -19,7 +19,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = MainTabBarController()
+        
+        let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+    //    let hasSeenOnboarding = false
+        
+        if hasSeenOnboarding {
+            window?.rootViewController = MainTabBarController()
+        } else {
+            window?.rootViewController = OnboardingViewController()
+        }
+        
         window?.makeKeyAndVisible()
     }
 }

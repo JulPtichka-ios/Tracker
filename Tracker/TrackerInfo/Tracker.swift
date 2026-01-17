@@ -38,20 +38,23 @@ extension WeekDay {
 }
 
 extension WeekDay {
+    var calendarWeekday: Int {
+        switch self {
+        case .sunday: return 1
+        case .monday: return 2
+        case .tuesday: return 3
+        case .wednesday: return 4
+        case .thursday: return 5
+        case .friday: return 6
+        case .saturday: return 7
+        }
+    }
+    
     func toDate(for referenceDate: Date = Date()) -> Date {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.year, .month], from: referenceDate)
         
-        let dayNumber: Int
-        switch self {
-        case .monday: dayNumber = 2
-        case .tuesday: dayNumber = 3
-        case .wednesday: dayNumber = 4
-        case .thursday: dayNumber = 5
-        case .friday: dayNumber = 6
-        case .saturday: dayNumber = 7
-        case .sunday: dayNumber = 1
-        }
+        let dayNumber = calendarWeekday
         
         let dayComponents = DateComponents(calendar: calendar,
                                          year: components.year,
@@ -60,6 +63,7 @@ extension WeekDay {
         return calendar.date(from: dayComponents) ?? referenceDate
     }
 }
+
 
 struct Tracker {
     let id: UUID

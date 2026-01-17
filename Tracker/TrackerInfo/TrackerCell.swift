@@ -16,6 +16,7 @@ final class TrackerCell: UICollectionViewCell {
     private let bottomContainer = UIView()
 
     private let emojiLabel = UILabel()
+    private let emojiBackgroundView = UIView()
     private let titleLabel = UILabel()
     private let counterLabel = UILabel()
     private let completeButton = UIButton(type: .custom)
@@ -29,6 +30,7 @@ final class TrackerCell: UICollectionViewCell {
         setupUI()
     }
 
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -41,10 +43,12 @@ final class TrackerCell: UICollectionViewCell {
 
     // MARK: - Public
 
-    func configure(with tracker: Tracker,
-                   isCompleted: Bool,
-                   isFutureDate: Bool,
-                   completionCount: Int) {
+    func configure(
+        with tracker: Tracker,
+        isCompleted: Bool,
+        isFutureDate: Bool,
+        completionCount: Int
+    ) {
         self.tracker = tracker
         self.isCompleted = isCompleted
         self.completionCount = completionCount
@@ -72,13 +76,18 @@ final class TrackerCell: UICollectionViewCell {
 
         contentView.layer.cornerRadius = 16
         contentView.layer.masksToBounds = false
-        contentView.layer.shadowColor = UIColor.black.withAlphaComponent(0.1).cgColor
-        contentView.layer.shadowOpacity = 1
-        contentView.layer.shadowRadius = 8
-        contentView.layer.shadowOffset = CGSize(width: 0, height: 4)
+        contentView.layer.shadowColor = nil
+        contentView.layer.shadowOpacity = 0
+        contentView.layer.shadowRadius = 0
+        contentView.layer.shadowOffset = .zero
 
         topContainer.layer.cornerRadius = 16
-        topContainer.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        topContainer.layer.maskedCorners = [
+            .layerMinXMinYCorner,
+            .layerMaxXMinYCorner,
+            .layerMinXMaxYCorner,
+            .layerMaxXMaxYCorner
+        ]
         topContainer.clipsToBounds = true
 
         bottomContainer.backgroundColor = .white
@@ -86,16 +95,38 @@ final class TrackerCell: UICollectionViewCell {
         bottomContainer.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         bottomContainer.clipsToBounds = true
 
+        // Настройка лейбла с эмодзи
         emojiLabel.font = UIFont.systemFont(ofSize: 32, weight: .medium)
+        emojiLabel.textColor = UIColor(named: "ypBlack") ?? .black
         emojiLabel.textAlignment = .left
+        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        // Настройка подложки под эмодзи
+        emojiBackgroundView.backgroundColor = UIColor.white.withAlphaComponent(0.3)
+        emojiBackgroundView.layer.cornerRadius = 22
+        emojiBackgroundView.clipsToBounds = true
+        emojiBackgroundView.translatesAutoresizingMaskIntoConstraints = false
+        emojiBackgroundView.addSubview(emojiLabel)
+
+        NSLayoutConstraint.activate([
+            // Размер самой подложки
+            emojiBackgroundView.widthAnchor.constraint(equalToConstant: 44),
+            emojiBackgroundView.heightAnchor.constraint(equalToConstant: 44),
+
+            // Позиционирование эмодзи внутри подложки
+            emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
+            emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor)
+        ])
 
         titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         titleLabel.textColor = .white
         titleLabel.numberOfLines = 2
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         counterLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
         counterLabel.textColor = UIColor(named: "ypBlack") ?? .label
         counterLabel.textAlignment = .left
+        counterLabel.translatesAutoresizingMaskIntoConstraints = false
 
         completeButton.backgroundColor = UIColor(named: tracker?.color ?? "ypGreen") ?? .systemGreen
         completeButton.layer.cornerRadius = 17
@@ -106,16 +137,18 @@ final class TrackerCell: UICollectionViewCell {
         completeButton.heightAnchor.constraint(equalToConstant: 34).isActive = true
         completeButton.addTarget(self, action: #selector(didTapComplete), for: .touchUpInside)
 
-        let topStack = UIStackView(arrangedSubviews: [emojiLabel, titleLabel])
+        // Верхний стек: подложка с эмодзи + заголовок
+        let topStack = UIStackView(arrangedSubviews: [emojiBackgroundView, titleLabel])
         topStack.axis = .vertical
         topStack.spacing = 8
         topStack.alignment = .leading
         topStack.layoutMargins = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
         topStack.isLayoutMarginsRelativeArrangement = true
-
-        topContainer.addSubview(topStack)
         topStack.translatesAutoresizingMaskIntoConstraints = false
 
+        topContainer.addSubview(topStack)
+
+        // Нижний стек: счётчик + кнопка
         let bottomStack = UIStackView(arrangedSubviews: [counterLabel, completeButton])
         bottomStack.axis = .horizontal
         bottomStack.alignment = .center
@@ -123,16 +156,17 @@ final class TrackerCell: UICollectionViewCell {
         bottomStack.spacing = 8
         bottomStack.layoutMargins = UIEdgeInsets(top: 8, left: 12, bottom: 12, right: 12)
         bottomStack.isLayoutMarginsRelativeArrangement = true
-
-        bottomContainer.addSubview(bottomStack)
         bottomStack.translatesAutoresizingMaskIntoConstraints = false
 
+        bottomContainer.addSubview(bottomStack)
+
+        // Главный стек
         let mainStack = UIStackView(arrangedSubviews: [topContainer, bottomContainer])
         mainStack.axis = .vertical
         mainStack.spacing = 0
+        mainStack.translatesAutoresizingMaskIntoConstraints = false
 
         contentView.addSubview(mainStack)
-        mainStack.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
             mainStack.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -155,12 +189,17 @@ final class TrackerCell: UICollectionViewCell {
     private func updateButtonAppearance() {
         let imageName = isCompleted ? "checkmark" : "plus"
         completeButton.setImage(UIImage(systemName: imageName), for: .normal)
-        
+
         if let colorName = tracker?.color {
-            completeButton.backgroundColor = UIColor(named: colorName)
+            let buttonColor = UIColor(named: colorName) ?? .systemGreen
+
+            UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseInOut) {
+                self.completeButton.backgroundColor = self.isCompleted
+                    ? buttonColor.withAlphaComponent(0.4)
+                    : buttonColor
+            }
         }
     }
-
 
     private func daysText(for count: Int) -> String {
         let lastTwo = count % 100

@@ -15,12 +15,16 @@ final class NewHabitViewController: UIViewController {
     private let titleTextField = UITextField()
     private let categoryButton = UIButton(type: .system)
     private let scheduleButton = UIButton(type: .system)
+    private var scheduleTitleLabel: UILabel?
+    private var scheduleStackView: UIStackView?
     private let errorLabel = UILabel()
     
     private let cancelButton = UIButton(type: .system)
     private let createButton = UIButton(type: .system)
     
     private var selectedCategory: String?
+    private var categoryTitleLabel: UILabel?
+    private var categoryStackView: UIStackView?
     private var selectedSchedule: Set<WeekDay> = []
     
     var onSave: ((Tracker) -> Void)?
@@ -49,6 +53,8 @@ final class NewHabitViewController: UIViewController {
         title = "Новая привычка"
         view.backgroundColor = UIColor(named: "ypWhite") ?? .white
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        selectedCategory = "Полезные привычки"
+        updateCategoryButtonTitle()
         updateCreateButtonState()
         updateScheduleButtonTitle()
     }
@@ -56,31 +62,24 @@ final class NewHabitViewController: UIViewController {
     // MARK: - Setup UI
     
     private func setupUI() {
-        setupScrollView()
+        setupContentView()
         setupTitleTextField()
         setupCategoryButton()
         setupScheduleButton()
         setupActionButtons()
     }
     
-    private func setupScrollView() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
+    private func setupContentView() {
         contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.backgroundColor = UIColor.clear
         
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
+        view.addSubview(contentView)
         
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
+            contentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
     }
     
@@ -88,9 +87,11 @@ final class NewHabitViewController: UIViewController {
         titleTextField.placeholder = "Введите название трекера"
         titleTextField.font = UIFont.systemFont(ofSize: 17)
         titleTextField.borderStyle = .roundedRect
-        titleTextField.layer.cornerRadius = 16
+        titleTextField.layer.cornerRadius = 18
+        titleTextField.clipsToBounds = true
         titleTextField.layer.borderWidth = 1
-        titleTextField.layer.borderColor = UIColor(named: "ypGray")?.cgColor
+        titleTextField.layer.borderColor = UIColor(named: "ypBackground")?.cgColor
+        titleTextField.backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
         titleTextField.delegate = self
         
         // RightView с крестиком
@@ -103,6 +104,7 @@ final class NewHabitViewController: UIViewController {
         clearButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
         clearButton.addTarget(self, action: #selector(clearTextField), for: .touchUpInside)
         clearButton.isHidden = true
+        clearButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -10, bottom: 0, right: 8)
 
         titleTextField.rightView = clearButton
         titleTextField.rightViewMode = .always
@@ -133,15 +135,24 @@ final class NewHabitViewController: UIViewController {
     }
 
     private func setupCategoryButton() {
-        categoryButton.backgroundColor = UIColor(named: "ypGray")?.withAlphaComponent(0.3)
+        categoryButton.backgroundColor = .clear
         categoryButton.layer.cornerRadius = 16
+        categoryButton.clipsToBounds = true
         categoryButton.addTarget(self, action: #selector(didTapCategory), for: .touchUpInside)
         
+        let buttonContainer = UIView()
+        buttonContainer.backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
+        buttonContainer.layer.cornerRadius = 16
+        buttonContainer.translatesAutoresizingMaskIntoConstraints = false
+        
         let titleLabel = UILabel()
-        titleLabel.text = "Категория"
-        titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
-        titleLabel.textColor = UIColor(named: "ypBlack") ?? .black
+        titleLabel.numberOfLines = 2
+        titleLabel.lineBreakMode = .byWordWrapping
+        titleLabel.preferredMaxLayoutWidth = 280
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = "Категория"
+        
+        categoryTitleLabel = titleLabel
         
         let arrowImageView = UIImageView(image: UIImage(named: "backButton")?.withRenderingMode(.alwaysTemplate))
         arrowImageView.tintColor = UIColor(named: "ypGray") ?? .systemGray
@@ -154,15 +165,31 @@ final class NewHabitViewController: UIViewController {
         stackView.distribution = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
-        categoryButton.addSubview(stackView)
+        categoryStackView = stackView
         
+        categoryButton.addSubview(buttonContainer)
+        buttonContainer.addSubview(stackView)
+        
+        titleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        titleLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        let spacer = stackView.arrangedSubviews[1] as? UIView
+        spacer?.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        spacer?.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: categoryButton.topAnchor, constant: 22),
-            stackView.leadingAnchor.constraint(equalTo: categoryButton.leadingAnchor, constant: 16),
-            stackView.trailingAnchor.constraint(equalTo: categoryButton.trailingAnchor, constant: -16),
-            stackView.bottomAnchor.constraint(equalTo: categoryButton.bottomAnchor, constant: -22),
+            buttonContainer.topAnchor.constraint(equalTo: categoryButton.topAnchor),
+            buttonContainer.leadingAnchor.constraint(equalTo: categoryButton.leadingAnchor),
+            buttonContainer.trailingAnchor.constraint(equalTo: categoryButton.trailingAnchor),
+            buttonContainer.bottomAnchor.constraint(equalTo: categoryButton.bottomAnchor),
             
-            titleLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 100),
+            stackView.topAnchor.constraint(equalTo: buttonContainer.topAnchor, constant: 22),
+            stackView.leadingAnchor.constraint(equalTo: buttonContainer.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: buttonContainer.trailingAnchor, constant: -16),
+            stackView.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor, constant: -22),
+            
+            titleLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 200),
+            titleLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
             
             arrowImageView.widthAnchor.constraint(equalToConstant: 24),
             arrowImageView.heightAnchor.constraint(equalToConstant: 24)
@@ -177,18 +204,32 @@ final class NewHabitViewController: UIViewController {
             categoryButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             categoryButton.heightAnchor.constraint(equalToConstant: 80)
         ])
+        
+        updateCategoryButtonTitle()
     }
 
+
     private func setupScheduleButton() {
-        scheduleButton.backgroundColor = UIColor(named: "ypGray")?.withAlphaComponent(0.3)
+        scheduleButton.backgroundColor = .clear
         scheduleButton.layer.cornerRadius = 16
+        scheduleButton.clipsToBounds = true
+        scheduleButton.isUserInteractionEnabled = true
         scheduleButton.addTarget(self, action: #selector(didTapSchedule), for: .touchUpInside)
+        
+        let buttonContainer = UIView()
+        buttonContainer.backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
+        buttonContainer.layer.cornerRadius = 16
+        buttonContainer.translatesAutoresizingMaskIntoConstraints = false
+        buttonContainer.isUserInteractionEnabled = false
         
         let titleLabel = UILabel()
         titleLabel.numberOfLines = 2
         titleLabel.lineBreakMode = .byWordWrapping
         titleLabel.preferredMaxLayoutWidth = 280
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = "Расписание"
+        
+        scheduleTitleLabel = titleLabel
         
         let arrowImageView = UIImageView(image: UIImage(named: "backButton")?.withRenderingMode(.alwaysTemplate))
         arrowImageView.tintColor = UIColor(named: "ypGray") ?? .systemGray
@@ -201,8 +242,10 @@ final class NewHabitViewController: UIViewController {
         stackView.distribution = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
-        scheduleButton.addSubview(stackView)
-        stackView.isUserInteractionEnabled = false
+        scheduleStackView = stackView
+        
+        scheduleButton.addSubview(buttonContainer)
+        buttonContainer.addSubview(stackView)
         
         titleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
         titleLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
@@ -212,10 +255,15 @@ final class NewHabitViewController: UIViewController {
         spacer?.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
 
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: scheduleButton.topAnchor, constant: 22),
-            stackView.leadingAnchor.constraint(equalTo: scheduleButton.leadingAnchor, constant: 16),
-            stackView.trailingAnchor.constraint(equalTo: scheduleButton.trailingAnchor, constant: -16),
-            stackView.bottomAnchor.constraint(equalTo: scheduleButton.bottomAnchor, constant: -22),
+            buttonContainer.topAnchor.constraint(equalTo: scheduleButton.topAnchor),
+            buttonContainer.leadingAnchor.constraint(equalTo: scheduleButton.leadingAnchor),
+            buttonContainer.trailingAnchor.constraint(equalTo: scheduleButton.trailingAnchor),
+            buttonContainer.bottomAnchor.constraint(equalTo: scheduleButton.bottomAnchor),
+            
+            stackView.topAnchor.constraint(equalTo: buttonContainer.topAnchor, constant: 22),
+            stackView.leadingAnchor.constraint(equalTo: buttonContainer.leadingAnchor, constant: 16),
+            stackView.trailingAnchor.constraint(equalTo: buttonContainer.trailingAnchor, constant: -16),
+            stackView.bottomAnchor.constraint(equalTo: buttonContainer.bottomAnchor, constant: -22),
             
             titleLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 200),
             titleLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
@@ -228,7 +276,7 @@ final class NewHabitViewController: UIViewController {
         contentView.addSubview(scheduleButton)
 
         NSLayoutConstraint.activate([
-            scheduleButton.topAnchor.constraint(equalTo: categoryButton.bottomAnchor, constant: 24),
+            scheduleButton.topAnchor.constraint(equalTo: categoryButton.bottomAnchor, constant: 0),
             scheduleButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             scheduleButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             scheduleButton.heightAnchor.constraint(equalToConstant: 80)
@@ -264,21 +312,19 @@ final class NewHabitViewController: UIViewController {
         buttonStack.distribution = .fillEqually
         
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(buttonStack)
+        view.addSubview(buttonStack)
         
         NSLayoutConstraint.activate([
-            buttonStack.topAnchor.constraint(equalTo: scheduleButton.bottomAnchor, constant: 48),
-            buttonStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            buttonStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            buttonStack.heightAnchor.constraint(equalToConstant: 60),
-            buttonStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -38)
+            buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            buttonStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            buttonStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            buttonStack.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
     
     // MARK: - Schedule button appearance
     private func updateScheduleButtonTitle() {
-        guard let stackView = scheduleButton.subviews.first(where: { $0 is UIStackView }) as? UIStackView,
-              let titleLabel = stackView.arrangedSubviews.first as? UILabel else { return }
+        guard let titleLabel = scheduleTitleLabel else { return }
         
         let fullText = scheduleText == "Расписание" || scheduleText.isEmpty ? "Расписание" : "Расписание\n\(scheduleText)"
         
@@ -312,11 +358,13 @@ final class NewHabitViewController: UIViewController {
     // MARK: - Actions
     
     @objc private func didTapCategory() {
+        updateCategoryButtonTitle()
         // TODO: экран категорий
         print("TODO: экран категорий")
     }
     
     @objc private func didTapSchedule() {
+        print("✅ Schedule button tapped!")
         let scheduleVC = ScheduleViewController()
         scheduleVC.selectedDays = Array(selectedSchedule)
         scheduleVC.onSave = { [weak self] days in
@@ -381,9 +429,43 @@ final class NewHabitViewController: UIViewController {
     // MARK: - Validation
     
     private func updateCreateButtonState() {
-        let isValid = !(titleTextField.text ?? "").isEmpty && !selectedSchedule.isEmpty
+        let isValid = !(titleTextField.text ?? "").isEmpty &&
+                      !selectedSchedule.isEmpty &&
+                      selectedCategory != nil && !selectedCategory!.isEmpty
         createButton.isEnabled = isValid
         createButton.backgroundColor = isValid ? UIColor(named: "ypBlack") : UIColor(named: "ypGray")
+    }
+    
+    // MARK: - Category button appearance
+    private func updateCategoryButtonTitle() {
+        guard let titleLabel = categoryTitleLabel else { return }
+        
+        let fullText = selectedCategory == nil || selectedCategory?.isEmpty == true ? "Категория" : "Категория\n\(selectedCategory!)"
+        
+        titleLabel.text = fullText
+        titleLabel.numberOfLines = 2
+        
+        guard fullText.contains("\n"), let newlineIndex = fullText.firstIndex(of: "\n") else {
+            titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+            titleLabel.textColor = UIColor(named: "ypBlack") ?? .black
+            return
+        }
+        
+        let lineBreakIndex = newlineIndex.utf16Offset(in: fullText)
+        let secondaryLength = fullText.count - lineBreakIndex - 1
+        
+        let attrText = NSMutableAttributedString(string: fullText)
+        attrText.addAttribute(.font, value: UIFont.systemFont(ofSize: 17, weight: .medium),
+                              range: NSRange(location: 0, length: lineBreakIndex))
+        attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypBlack") ?? .black,
+                              range: NSRange(location: 0, length: lineBreakIndex))
+        
+        attrText.addAttribute(.font, value: UIFont.systemFont(ofSize: 13, weight: .medium),
+                              range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))
+        attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypGray") ?? .systemGray,
+                              range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))
+        
+        titleLabel.attributedText = attrText
     }
 }
 
@@ -400,3 +482,4 @@ extension NewHabitViewController: UITextFieldDelegate {
         return updatedText.count <= 38
     }
 }
+

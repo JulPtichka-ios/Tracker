@@ -19,6 +19,7 @@ final class ScheduleViewController: UIViewController {
         super.viewDidLoad()
         title = "Расписание"
         view.backgroundColor = UIColor(named: "ypWhite") ?? .white
+        navigationItem.hidesBackButton = true
         setupLayout()
     }
 
@@ -58,8 +59,8 @@ final class ScheduleViewController: UIViewController {
             contentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            contentView.heightAnchor.constraint(equalToConstant: 390),
-
+            contentView.bottomAnchor.constraint(equalTo: doneButton.topAnchor, constant: -16),
+            
             tableView.topAnchor.constraint(equalTo: contentView.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
@@ -75,7 +76,7 @@ final class ScheduleViewController: UIViewController {
     private func updateDoneButtonState() {
         let hasSelectedDays = !selectedDays.isEmpty
         doneButton.isEnabled = hasSelectedDays
-        doneButton.backgroundColor = hasSelectedDays ? UIColor(named: "ypBlack") : UIColor(named: "ypGray")
+        doneButton.backgroundColor = hasSelectedDays ? UIColor(named: "ypBlack") : UIColor(named: "ypBlack")
     }
 
     @objc private func didTapDone() {
@@ -168,6 +169,6 @@ extension ScheduleViewController: UITableViewDataSource {
 
 extension ScheduleViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        56
+        86
     }
 }
