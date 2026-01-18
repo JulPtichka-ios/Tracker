@@ -19,7 +19,6 @@
             </array>
         </dict>
     </dict>
-    <!-- 🔥 LAUNCH SCREEN -->
     <key>UILaunchScreen</key>
     <dict>
         <key>UIColorName</key>
