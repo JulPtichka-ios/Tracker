@@ -186,7 +186,7 @@ class TrackersViewController: UIViewController {
             section.boundarySupplementaryItems = [header]
 
             section.contentInsets = NSDirectionalEdgeInsets(
-                top: 16,
+                top: 4,
                 leading: 12,
                 bottom: 16,
                 trailing: 12
@@ -218,6 +218,10 @@ class TrackersViewController: UIViewController {
         datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
         datePicker.date = currentDate
+        
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
+        datePicker.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        datePicker.heightAnchor.constraint(equalToConstant: 40).isActive = true
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
     }
@@ -264,10 +268,6 @@ class TrackersViewController: UIViewController {
     // MARK: - Actions
     @objc private func dateChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
-        if currentDate > Date() {
-            currentDate = Date()
-            sender.date = currentDate
-        }
         updateUI()
     }
     
@@ -404,7 +404,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         cell.configure(
             with: tracker,
             isCompleted: isCompletedToday,
-            isFutureDate: currentDate > Date(),
+            isFutureDate: false,
             completionCount: totalCompletions
         )
         

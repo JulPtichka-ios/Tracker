@@ -20,35 +20,45 @@ final class ScheduleViewController: UIViewController {
         title = "Расписание"
         view.backgroundColor = UIColor(named: "ypWhite") ?? .white
         navigationItem.hidesBackButton = true
+        setupNavigationTitle()
         setupLayout()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        tableView.reloadData() 
-        updateDoneButtonState()
+        tableView.reloadData()
+    }
+
+    private func setupNavigationTitle() {
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 16, weight: .medium),
+            .foregroundColor: UIColor(named: "ypBlack") ?? .black
+        ]
+        navigationController?.navigationBar.titleTextAttributes = titleAttributes
     }
 
     private func setupLayout() {
         contentView.backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
         contentView.layer.cornerRadius = 16
+        contentView.layer.masksToBounds = true
         contentView.translatesAutoresizingMaskIntoConstraints = false
 
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(ScheduleCell.self, forCellReuseIdentifier: ScheduleCell.identifier)
-        tableView.separatorStyle = .singleLine
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 70, bottom: 0, right: 20)
+        tableView.separatorStyle = .none
         tableView.backgroundColor = .clear
         tableView.isScrollEnabled = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
 
         doneButton.setTitle("Готово", for: .normal)
         doneButton.setTitleColor(.white, for: .normal)
-        doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
-        doneButton.backgroundColor = UIColor(named: "ypGray")
+        doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        doneButton.backgroundColor = UIColor(named: "ypBlack")
         doneButton.layer.cornerRadius = 16
+        doneButton.layer.masksToBounds = true
         doneButton.addTarget(self, action: #selector(didTapDone), for: .touchUpInside)
+        doneButton.isEnabled = true
         doneButton.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(contentView)
@@ -59,24 +69,18 @@ final class ScheduleViewController: UIViewController {
             contentView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            contentView.bottomAnchor.constraint(equalTo: doneButton.topAnchor, constant: -16),
+            contentView.heightAnchor.constraint(equalToConstant: 525),
             
             tableView.topAnchor.constraint(equalTo: contentView.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
 
-            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             doneButton.heightAnchor.constraint(equalToConstant: 60)
         ])
-    }
-
-    private func updateDoneButtonState() {
-        let hasSelectedDays = !selectedDays.isEmpty
-        doneButton.isEnabled = hasSelectedDays
-        doneButton.backgroundColor = hasSelectedDays ? UIColor(named: "ypBlack") : UIColor(named: "ypBlack")
     }
 
     @objc private func didTapDone() {
@@ -92,6 +96,7 @@ final class ScheduleCell: UITableViewCell {
 
     let dayLabel = UILabel()
     let daySwitch = UISwitch()
+    let separatorView = UIView()
 
     var onToggle: ((Bool) -> Void)?
 
@@ -105,26 +110,43 @@ final class ScheduleCell: UITableViewCell {
     }
 
     private func setupUI() {
-        dayLabel.font = UIFont.systemFont(ofSize: 17)
+        dayLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         dayLabel.textColor = UIColor(named: "ypBlack") ?? .label
         dayLabel.translatesAutoresizingMaskIntoConstraints = false
 
         daySwitch.onTintColor = UIColor(named: "ypBlue") ?? .systemBlue
         daySwitch.addTarget(self, action: #selector(switchToggled), for: .valueChanged)
         daySwitch.translatesAutoresizingMaskIntoConstraints = false
+        
+        separatorView.backgroundColor = UIColor(named: "ypBlack")?.withAlphaComponent(0.3)
+        separatorView.translatesAutoresizingMaskIntoConstraints = false
+        separatorView.isHidden = false
 
         contentView.addSubview(dayLabel)
         contentView.addSubview(daySwitch)
+        contentView.addSubview(separatorView)
 
         NSLayoutConstraint.activate([
             dayLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            dayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            dayLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            
             daySwitch.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            daySwitch.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20)
+            daySwitch.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
+            separatorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            separatorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            separatorView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            separatorView.heightAnchor.constraint(equalToConstant: 0.5)
         ])
 
         selectionStyle = .none
-        backgroundColor = .clear
+        backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        separatorView.isHidden = false
+        onToggle = nil
     }
 
     @objc private func switchToggled() {
@@ -148,6 +170,9 @@ extension ScheduleViewController: UITableViewDataSource {
         let day = WeekDay.allCases[indexPath.row]
         cell.dayLabel.text = day.title
         cell.daySwitch.isOn = selectedDays.contains(day)
+        
+        cell.separatorView.isHidden = (indexPath.row == WeekDay.allCases.count - 1)
+        
         cell.onToggle = { [weak self] isOn in
             guard let self = self else { return }
             if isOn {
@@ -157,8 +182,6 @@ extension ScheduleViewController: UITableViewDataSource {
             } else {
                 self.selectedDays.removeAll { $0 == day }
             }
-            self.tableView.reloadData()
-            self.updateDoneButtonState()
         }
 
         return cell
@@ -169,6 +192,6 @@ extension ScheduleViewController: UITableViewDataSource {
 
 extension ScheduleViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        86
+        75
     }
 }

@@ -12,7 +12,7 @@ final class TrackerCell: UICollectionViewCell {
 
     var completionHandler: ((Bool) -> Void)?
 
-    private let topContainer = UIView()
+    private let coloredContainer = UIView()
     private let bottomContainer = UIView()
 
     private let emojiLabel = UILabel()
@@ -54,10 +54,10 @@ final class TrackerCell: UICollectionViewCell {
         self.completionCount = completionCount
 
         let color = UIColor(named: tracker.color) ?? .systemBlue
-        topContainer.backgroundColor = color
+        coloredContainer.backgroundColor = color
+        completeButton.backgroundColor = color
 
         emojiLabel.text = tracker.emoji
-
         titleLabel.text = tracker.title
 
         let word = daysText(for: completionCount)
@@ -74,131 +74,127 @@ final class TrackerCell: UICollectionViewCell {
     private func setupUI() {
         contentView.backgroundColor = .clear
 
-        contentView.layer.cornerRadius = 16
-        contentView.layer.masksToBounds = false
-        contentView.layer.shadowColor = nil
-        contentView.layer.shadowOpacity = 0
-        contentView.layer.shadowRadius = 0
-        contentView.layer.shadowOffset = .zero
-
-        topContainer.layer.cornerRadius = 16
-        topContainer.layer.maskedCorners = [
+        coloredContainer.layer.cornerRadius = 16
+        coloredContainer.layer.maskedCorners = [
             .layerMinXMinYCorner,
             .layerMaxXMinYCorner,
             .layerMinXMaxYCorner,
             .layerMaxXMaxYCorner
         ]
-        topContainer.clipsToBounds = true
+        coloredContainer.clipsToBounds = true
+        coloredContainer.translatesAutoresizingMaskIntoConstraints = false
 
         bottomContainer.backgroundColor = .white
-        bottomContainer.layer.cornerRadius = 16
-        bottomContainer.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        bottomContainer.layer.cornerRadius = 0
         bottomContainer.clipsToBounds = true
+        bottomContainer.translatesAutoresizingMaskIntoConstraints = false
 
-        // Настройка лейбла с эмодзи
-        emojiLabel.font = UIFont.systemFont(ofSize: 32, weight: .medium)
+        emojiLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         emojiLabel.textColor = UIColor(named: "ypBlack") ?? .black
-        emojiLabel.textAlignment = .left
+        emojiLabel.textAlignment = .center
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        // Настройка подложки под эмодзи
         emojiBackgroundView.backgroundColor = UIColor.white.withAlphaComponent(0.3)
-        emojiBackgroundView.layer.cornerRadius = 22
+        emojiBackgroundView.layer.cornerRadius = 12
         emojiBackgroundView.clipsToBounds = true
         emojiBackgroundView.translatesAutoresizingMaskIntoConstraints = false
         emojiBackgroundView.addSubview(emojiLabel)
 
         NSLayoutConstraint.activate([
-            // Размер самой подложки
-            emojiBackgroundView.widthAnchor.constraint(equalToConstant: 44),
-            emojiBackgroundView.heightAnchor.constraint(equalToConstant: 44),
-
-            // Позиционирование эмодзи внутри подложки
+            emojiBackgroundView.widthAnchor.constraint(equalToConstant: 24),
+            emojiBackgroundView.heightAnchor.constraint(equalToConstant: 24),
             emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
             emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor)
         ])
 
-        titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        titleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         titleLabel.textColor = .white
         titleLabel.numberOfLines = 2
+        titleLabel.lineBreakMode = .byWordWrapping
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        counterLabel.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        counterLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         counterLabel.textColor = UIColor(named: "ypBlack") ?? .label
         counterLabel.textAlignment = .left
         counterLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        completeButton.backgroundColor = UIColor(named: tracker?.color ?? "ypGreen") ?? .systemGreen
         completeButton.layer.cornerRadius = 17
         completeButton.layer.borderWidth = 0
         completeButton.tintColor = UIColor(named: "ypWhite") ?? .white
         completeButton.translatesAutoresizingMaskIntoConstraints = false
-        completeButton.widthAnchor.constraint(equalToConstant: 34).isActive = true
-        completeButton.heightAnchor.constraint(equalToConstant: 34).isActive = true
         completeButton.addTarget(self, action: #selector(didTapComplete), for: .touchUpInside)
+        
+        NSLayoutConstraint.activate([
+            completeButton.widthAnchor.constraint(equalToConstant: 34),
+            completeButton.heightAnchor.constraint(equalToConstant: 34)
+        ])
+        
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 11, weight: .medium)
+        let plusImage = UIImage(systemName: "plus", withConfiguration: symbolConfig)
+        let checkmarkImage = UIImage(systemName: "checkmark", withConfiguration: symbolConfig)
+        
+        completeButton.setImage(plusImage, for: .normal)
+        completeButton.setImage(checkmarkImage, for: .selected)
 
-        // Верхний стек: подложка с эмодзи + заголовок
-        let topStack = UIStackView(arrangedSubviews: [emojiBackgroundView, titleLabel])
-        topStack.axis = .vertical
-        topStack.spacing = 8
-        topStack.alignment = .leading
-        topStack.layoutMargins = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-        topStack.isLayoutMarginsRelativeArrangement = true
-        topStack.translatesAutoresizingMaskIntoConstraints = false
+        let coloredStack = UIStackView(arrangedSubviews: [emojiBackgroundView, titleLabel])
+        coloredStack.axis = .vertical
+        coloredStack.spacing = 8
+        coloredStack.alignment = .leading
+        coloredStack.layoutMargins = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        coloredStack.isLayoutMarginsRelativeArrangement = true
+        coloredStack.translatesAutoresizingMaskIntoConstraints = false
 
-        topContainer.addSubview(topStack)
+        coloredContainer.addSubview(coloredStack)
 
-        // Нижний стек: счётчик + кнопка
         let bottomStack = UIStackView(arrangedSubviews: [counterLabel, completeButton])
         bottomStack.axis = .horizontal
         bottomStack.alignment = .center
         bottomStack.distribution = .fill
         bottomStack.spacing = 8
-        bottomStack.layoutMargins = UIEdgeInsets(top: 8, left: 12, bottom: 12, right: 12)
+        bottomStack.layoutMargins = UIEdgeInsets(top: 16, left: 12, bottom: 12, right: 12)
         bottomStack.isLayoutMarginsRelativeArrangement = true
         bottomStack.translatesAutoresizingMaskIntoConstraints = false
 
         bottomContainer.addSubview(bottomStack)
 
-        // Главный стек
-        let mainStack = UIStackView(arrangedSubviews: [topContainer, bottomContainer])
-        mainStack.axis = .vertical
-        mainStack.spacing = 0
-        mainStack.translatesAutoresizingMaskIntoConstraints = false
-
-        contentView.addSubview(mainStack)
+        contentView.addSubview(coloredContainer)
+        contentView.addSubview(bottomContainer)
 
         NSLayoutConstraint.activate([
-            mainStack.topAnchor.constraint(equalTo: contentView.topAnchor),
-            mainStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            mainStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            mainStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-
-            topStack.topAnchor.constraint(equalTo: topContainer.topAnchor),
-            topStack.leadingAnchor.constraint(equalTo: topContainer.leadingAnchor),
-            topStack.trailingAnchor.constraint(equalTo: topContainer.trailingAnchor),
-            topStack.bottomAnchor.constraint(equalTo: topContainer.bottomAnchor),
-
+            coloredContainer.topAnchor.constraint(equalTo: contentView.topAnchor),
+            coloredContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            coloredContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            coloredContainer.heightAnchor.constraint(equalTo: contentView.heightAnchor, multiplier: 0.59),
+            
+            bottomContainer.topAnchor.constraint(equalTo: coloredContainer.bottomAnchor),
+            bottomContainer.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            bottomContainer.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            bottomContainer.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            
+            coloredStack.topAnchor.constraint(equalTo: coloredContainer.topAnchor),
+            coloredStack.leadingAnchor.constraint(equalTo: coloredContainer.leadingAnchor),
+            coloredStack.trailingAnchor.constraint(equalTo: coloredContainer.trailingAnchor),
+            coloredStack.bottomAnchor.constraint(equalTo: coloredContainer.bottomAnchor),
+            
             bottomStack.topAnchor.constraint(equalTo: bottomContainer.topAnchor),
             bottomStack.leadingAnchor.constraint(equalTo: bottomContainer.leadingAnchor),
             bottomStack.trailingAnchor.constraint(equalTo: bottomContainer.trailingAnchor),
-            bottomStack.bottomAnchor.constraint(equalTo: bottomContainer.bottomAnchor),
+            bottomStack.bottomAnchor.constraint(equalTo: bottomContainer.bottomAnchor)
         ])
     }
 
     private func updateButtonAppearance() {
-        let imageName = isCompleted ? "checkmark" : "plus"
-        completeButton.setImage(UIImage(systemName: imageName), for: .normal)
-
         if let colorName = tracker?.color {
             let buttonColor = UIColor(named: colorName) ?? .systemGreen
-
+            
             UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseInOut) {
                 self.completeButton.backgroundColor = self.isCompleted
                     ? buttonColor.withAlphaComponent(0.4)
                     : buttonColor
             }
         }
+        
+        completeButton.isSelected = isCompleted
     }
 
     private func daysText(for count: Int) -> String {
@@ -225,5 +221,22 @@ final class TrackerCell: UICollectionViewCell {
         isCompleted.toggle()
         updateButtonAppearance()
         completionHandler?(isCompleted)
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        tracker = nil
+        isCompleted = false
+        completionCount = 0
+        completionHandler = nil
+        
+        coloredContainer.backgroundColor = nil
+        completeButton.backgroundColor = nil
+        emojiLabel.text = nil
+        titleLabel.text = nil
+        counterLabel.text = nil
+        completeButton.isSelected = false
+        completeButton.isEnabled = true
+        contentView.alpha = 1.0
     }
 }
