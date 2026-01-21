@@ -48,7 +48,7 @@ final class NewHabitViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         navigationController?.navigationBar.titleTextAttributes = [
-            .font: UIFont.systemFont(ofSize: 17, weight: .medium),
+            .font: UIFont.systemFont(ofSize: 16, weight: .medium),
             .foregroundColor: UIColor(named: "ypBlack") ?? .black
         ]
         title = "Новая привычка"
@@ -130,7 +130,7 @@ final class NewHabitViewController: UIViewController {
         
         // Error label
         errorLabel.text = "Ограничение 38 символов"
-        errorLabel.font = UIFont.systemFont(ofSize: 13)
+        errorLabel.font = UIFont.systemFont(ofSize: 17)
         errorLabel.textColor = .ypRed
         errorLabel.textAlignment = .center
         errorLabel.isHidden = true
@@ -165,7 +165,7 @@ final class NewHabitViewController: UIViewController {
         let buttonStack = UIStackView()
         buttonStack.axis = .vertical
         buttonStack.spacing = 0
-        buttonStack.distribution = .fillProportionally
+        buttonStack.distribution = .fillEqually
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
 
         let categoryContainer = UIView()
@@ -232,48 +232,50 @@ final class NewHabitViewController: UIViewController {
         divider.backgroundColor = UIColor(named: "ypBlack")?.withAlphaComponent(0.3)
         divider.translatesAutoresizingMaskIntoConstraints = false
 
-        let dividerContainer = UIView()
-        dividerContainer.translatesAutoresizingMaskIntoConstraints = false
-        dividerContainer.addSubview(divider)
-
-        // Сборка стека
         buttonStack.addArrangedSubview(categoryContainer)
-        buttonStack.addArrangedSubview(dividerContainer)
         buttonStack.addArrangedSubview(scheduleContainer)
+
+        buttonStack.setCustomSpacing(0.5, after: categoryContainer)
 
         containerBackground.addSubview(buttonStack)
         tabContainerView.addSubview(containerBackground)
 
+        containerBackground.addSubview(divider)
+
         NSLayoutConstraint.activate([
-            divider.leadingAnchor.constraint(equalTo: dividerContainer.leadingAnchor, constant: 20),
-            divider.trailingAnchor.constraint(equalTo: dividerContainer.trailingAnchor, constant: -20),
-            divider.centerYAnchor.constraint(equalTo: dividerContainer.centerYAnchor),
-            divider.heightAnchor.constraint(equalToConstant: 0.5),
-            dividerContainer.heightAnchor.constraint(equalToConstant: 0.5),
-
-            containerBackground.topAnchor.constraint(equalTo: tabContainerView.topAnchor),
-            containerBackground.leadingAnchor.constraint(equalTo: tabContainerView.leadingAnchor),
-            containerBackground.trailingAnchor.constraint(equalTo: tabContainerView.trailingAnchor),
-            containerBackground.bottomAnchor.constraint(equalTo: tabContainerView.bottomAnchor),
-
             categoryContentStack.topAnchor.constraint(equalTo: categoryContainer.topAnchor, constant: 16),
             categoryContentStack.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor, constant: 20),
             categoryContentStack.trailingAnchor.constraint(equalTo: categoryContainer.trailingAnchor, constant: -20),
             categoryContentStack.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor, constant: -16),
             categoryArrow.widthAnchor.constraint(equalToConstant: 16),
             categoryArrow.heightAnchor.constraint(equalToConstant: 16),
-
+            
             scheduleContentStack.topAnchor.constraint(equalTo: scheduleContainer.topAnchor, constant: 16),
             scheduleContentStack.leadingAnchor.constraint(equalTo: scheduleContainer.leadingAnchor, constant: 20),
             scheduleContentStack.trailingAnchor.constraint(equalTo: scheduleContainer.trailingAnchor, constant: -20),
             scheduleContentStack.bottomAnchor.constraint(equalTo: scheduleContainer.bottomAnchor, constant: -16),
             scheduleArrow.widthAnchor.constraint(equalToConstant: 16),
             scheduleArrow.heightAnchor.constraint(equalToConstant: 16),
-
+            
+            divider.leadingAnchor.constraint(equalTo: containerBackground.leadingAnchor, constant: 20),
+            divider.trailingAnchor.constraint(equalTo: containerBackground.trailingAnchor, constant: -20),
+            divider.centerYAnchor.constraint(equalTo: containerBackground.centerYAnchor),
+            divider.heightAnchor.constraint(equalToConstant: 0.5),
+            
             buttonStack.topAnchor.constraint(equalTo: containerBackground.topAnchor),
             buttonStack.leadingAnchor.constraint(equalTo: containerBackground.leadingAnchor),
             buttonStack.trailingAnchor.constraint(equalTo: containerBackground.trailingAnchor),
-            buttonStack.bottomAnchor.constraint(equalTo: containerBackground.bottomAnchor)
+            buttonStack.bottomAnchor.constraint(equalTo: containerBackground.bottomAnchor),
+            
+            containerBackground.topAnchor.constraint(equalTo: tabContainerView.topAnchor),
+            containerBackground.leadingAnchor.constraint(equalTo: tabContainerView.leadingAnchor),
+            containerBackground.trailingAnchor.constraint(equalTo: tabContainerView.trailingAnchor),
+            containerBackground.bottomAnchor.constraint(equalTo: tabContainerView.bottomAnchor)
+        ])
+
+        NSLayoutConstraint.activate([
+            categoryContainer.heightAnchor.constraint(equalToConstant: 75),
+            scheduleContainer.heightAnchor.constraint(equalToConstant: 75)
         ])
 
         tabContainerView.translatesAutoresizingMaskIntoConstraints = false
