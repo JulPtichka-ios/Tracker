@@ -48,10 +48,18 @@ final class NewHabitViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         navigationController?.navigationBar.titleTextAttributes = [
-            .font: UIFont.systemFont(ofSize: 16, weight: .medium),
+            .font: AppTextStyles.medium16,
             .foregroundColor: UIColor(named: "ypBlack") ?? .black
         ]
         title = "Новая привычка"
+        
+        let navigationBarAppearance = UINavigationBarAppearance()
+        navigationBarAppearance.configureWithOpaqueBackground()
+        navigationBarAppearance.backgroundColor = UIColor(named: "ypWhite") ?? .white
+        navigationBarAppearance.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 12)
+        
+        navigationController?.navigationBar.standardAppearance = navigationBarAppearance
+        
         view.backgroundColor = UIColor(named: "ypWhite") ?? .white
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         selectedCategory = "Полезные привычки"
@@ -102,7 +110,7 @@ final class NewHabitViewController: UIViewController {
     
     private func setupTitleTextField() {
         titleTextField.placeholder = "Введите название трекера"
-        titleTextField.font = UIFont.systemFont(ofSize: 17)
+        titleTextField.font = AppTextStyles.regular17
         titleTextField.borderStyle = .none
         titleTextField.layer.cornerRadius = 18
         titleTextField.clipsToBounds = true
@@ -130,7 +138,7 @@ final class NewHabitViewController: UIViewController {
         
         // Error label
         errorLabel.text = "Ограничение 38 символов"
-        errorLabel.font = UIFont.systemFont(ofSize: 17)
+        errorLabel.font = AppTextStyles.regular17
         errorLabel.textColor = .ypRed
         errorLabel.textAlignment = .center
         errorLabel.isHidden = true
@@ -282,7 +290,7 @@ final class NewHabitViewController: UIViewController {
         contentView.addSubview(tabContainerView)
 
         NSLayoutConstraint.activate([
-            tabContainerView.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 16),
+            tabContainerView.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 8),
             tabContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             tabContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             tabContainerView.heightAnchor.constraint(equalToConstant: 150)
@@ -297,6 +305,14 @@ final class NewHabitViewController: UIViewController {
         cancelConfig.title = "Отменить"
         cancelConfig.baseForegroundColor = UIColor(named: "ypRed") ?? .systemRed
         cancelConfig.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
+        
+        cancelConfig.attributedTitle = AttributedString(
+            AppTextStyles.attributed(
+                "Отменить",
+                style: AppTextStyles.medium16,
+                color: UIColor(named: "ypRed") ?? .systemRed
+            )
+        )
 
         cancelButton.configuration = cancelConfig
         cancelButton.backgroundColor = .clear
@@ -307,7 +323,7 @@ final class NewHabitViewController: UIViewController {
         
         createButton.setTitle("Создать", for: .normal)
         createButton.setTitleColor(.white, for: .normal)
-        createButton.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .medium)
+        createButton.titleLabel?.font = AppTextStyles.medium16
         createButton.backgroundColor = UIColor(named: "ypGray")
         createButton.layer.cornerRadius = 16
         createButton.isEnabled = false
@@ -339,7 +355,7 @@ final class NewHabitViewController: UIViewController {
         titleLabel.numberOfLines = 2
         
         guard fullText.contains("\n"), let newlineIndex = fullText.firstIndex(of: "\n") else {
-            titleLabel.font = UIFont.systemFont(ofSize: 17)
+            titleLabel.font = AppTextStyles.regular17
             titleLabel.textColor = UIColor(named: "ypBlack") ?? .black
             return
         }
@@ -348,12 +364,12 @@ final class NewHabitViewController: UIViewController {
         let secondaryLength = fullText.count - lineBreakIndex - 1
         
         let attrText = NSMutableAttributedString(string: fullText)
-        attrText.addAttribute(.font, value: UIFont.systemFont(ofSize: 17),
+        attrText.addAttribute(.font, value: AppTextStyles.regular17,
                               range: NSRange(location: 0, length: lineBreakIndex))
         attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypBlack") ?? .black,
                               range: NSRange(location: 0, length: lineBreakIndex))
         
-        attrText.addAttribute(.font, value: UIFont.systemFont(ofSize: 13),
+        attrText.addAttribute(.font, value: AppTextStyles.regular17,
                               range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))
         attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypGray") ?? .systemGray,
                               range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))
@@ -450,7 +466,7 @@ final class NewHabitViewController: UIViewController {
         titleLabel.numberOfLines = 2
         
         guard fullText.contains("\n"), let newlineIndex = fullText.firstIndex(of: "\n") else {
-            titleLabel.font = UIFont.systemFont(ofSize: 17)
+            titleLabel.font = AppTextStyles.regular17
             titleLabel.textColor = UIColor(named: "ypBlack") ?? .black
             return
         }
@@ -459,12 +475,12 @@ final class NewHabitViewController: UIViewController {
         let secondaryLength = fullText.count - lineBreakIndex - 1
         
         let attrText = NSMutableAttributedString(string: fullText)
-        attrText.addAttribute(.font, value: UIFont.systemFont(ofSize: 17),
+        attrText.addAttribute(.font, value: AppTextStyles.regular17,
                               range: NSRange(location: 0, length: lineBreakIndex))
         attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypBlack") ?? .black,
                               range: NSRange(location: 0, length: lineBreakIndex))
         
-        attrText.addAttribute(.font, value: UIFont.systemFont(ofSize: 13),
+        attrText.addAttribute(.font, value: AppTextStyles.regular17,
                               range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))
         attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypGray") ?? .systemGray,
                               range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))

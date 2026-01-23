@@ -53,12 +53,14 @@ class TrackersViewController: UIViewController {
     
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
     private let placeholderView: UIView = {
+        let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 12
         stack.alignment = .center
         stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.distribution = .fill
         
         let starImage = UIImageView(image: UIImage(named: "errorStar"))
         starImage.tintColor = UIColor(named: "ypGray")
@@ -83,7 +85,17 @@ class TrackersViewController: UIViewController {
         
         stack.addArrangedSubview(starImage)
         stack.addArrangedSubview(label)
-        return stack
+        
+        containerView.addSubview(stack)
+        
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            stack.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: 110),
+            stack.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: -16)
+        ])
+        
+        return containerView
     }()
     
     override func viewDidLoad() {
