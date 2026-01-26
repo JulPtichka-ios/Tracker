@@ -53,12 +53,14 @@ class TrackersViewController: UIViewController {
     
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
     private let placeholderView: UIView = {
+        let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = 12
         stack.alignment = .center
         stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.distribution = .fill
         
         let starImage = UIImageView(image: UIImage(named: "errorStar"))
         starImage.tintColor = UIColor(named: "ypGray")
@@ -83,7 +85,17 @@ class TrackersViewController: UIViewController {
         
         stack.addArrangedSubview(starImage)
         stack.addArrangedSubview(label)
-        return stack
+        
+        containerView.addSubview(stack)
+        
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            stack.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: 110),
+            stack.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: -16)
+        ])
+        
+        return containerView
     }()
     
     override func viewDidLoad() {
@@ -186,7 +198,7 @@ class TrackersViewController: UIViewController {
             section.boundarySupplementaryItems = [header]
 
             section.contentInsets = NSDirectionalEdgeInsets(
-                top: 16,
+                top: 4,
                 leading: 12,
                 bottom: 16,
                 trailing: 12
@@ -218,6 +230,10 @@ class TrackersViewController: UIViewController {
         datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
         datePicker.date = currentDate
+        
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
+        datePicker.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        datePicker.heightAnchor.constraint(equalToConstant: 40).isActive = true
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
     }
@@ -264,10 +280,6 @@ class TrackersViewController: UIViewController {
     // MARK: - Actions
     @objc private func dateChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
-        if currentDate > Date() {
-            currentDate = Date()
-            sender.date = currentDate
-        }
         updateUI()
     }
     
@@ -299,6 +311,22 @@ class TrackersViewController: UIViewController {
         
         collectionView.reloadData()
     }
+    
+    private func getVisibleCategories() -> [TrackerCategory] {
+        let weekday = Calendar.current.component(.weekday, from: currentDate)
+        return filteredCategories.filter {
+            $0.trackers.contains { tracker in
+                tracker.schedule.contains { $0.calendarWeekday == weekday }
+            }
+        }
+    }
+    
+    private func getTrackersForToday(in category: TrackerCategory) -> [Tracker] {
+        let weekday = Calendar.current.component(.weekday, from: currentDate)
+        return category.trackers.filter {
+            $0.schedule.contains { $0.calendarWeekday == weekday }
+        }
+    }
       
     // MARK: - Data methods
     func addTracker(_ tracker: Tracker, to categoryTitle: String) {
@@ -329,6 +357,7 @@ class TrackersViewController: UIViewController {
     }
 }
 
+// MARK: - SearchManagerDelegate
 extension TrackersViewController: SearchManagerDelegate {
     func didUpdateSearchResults(_ filteredCategories: [TrackerCategory]) {
         self.filteredCategories = filteredCategories
@@ -336,6 +365,7 @@ extension TrackersViewController: SearchManagerDelegate {
     }
 }
 
+// MARK: - UISearchResultsUpdating
 extension TrackersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         let searchText = searchController.searchBar.text ?? ""
@@ -343,102 +373,117 @@ extension TrackersViewController: UISearchResultsUpdating {
     }
 }
 
+// MARK: - Date helpers
+private extension TrackersViewController {
+    func isFutureDate(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let selectedDay = calendar.startOfDay(for: date)
+        return selectedDay > today
+    }
+}
+
 // MARK: - UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDataSource {
-    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        let weekday = Calendar.current.component(.weekday, from: currentDate)
-        return filteredCategories.filter {
-            $0.trackers.contains(where: { tracker in
-                tracker.schedule.contains(where: { $0.calendarWeekday == weekday })
-            })
-        }.count
+        return getVisibleCategories().count
     }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let weekday = Calendar.current.component(.weekday, from: currentDate)
-        let visibleCategories = filteredCategories.filter {
-            $0.trackers.contains(where: { tracker in
-                tracker.schedule.contains(where: { $0.calendarWeekday == weekday })
-            })
-        }
+    func collectionView(_ collectionView: UICollectionView,
+                       numberOfItemsInSection section: Int) -> Int {
+        let visibleCategories = getVisibleCategories()
         guard section < visibleCategories.count else { return 0 }
+        
         let category = visibleCategories[section]
-        let count = category.trackers.filter {
-            $0.schedule.contains(where: { $0.calendarWeekday == weekday })
-        }.count
-        print("🔢 Items in section \(section): \(count)")
-        return count
+        let trackersForToday = getTrackersForToday(in: category)
+        return trackersForToday.count
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        print("🔍 cellForItemAt: \(indexPath.item)")
-        
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: TrackerCell.identifier,
             for: indexPath
         ) as? TrackerCell else {
-            print("❌ Cannot dequeue TrackerCell")
             return UICollectionViewCell()
         }
-        
-        let weekday = Calendar.current.component(.weekday, from: currentDate)
-        let visibleCategories = filteredCategories.filter {
-            $0.trackers.contains(where: { tracker in
-                tracker.schedule.contains(where: { $0.calendarWeekday == weekday })
-            })
-        }
+
+        let visibleCategories = getVisibleCategories()
         guard indexPath.section < visibleCategories.count else {
             return cell
         }
+
         let category = visibleCategories[indexPath.section]
-        let trackers = category.trackers.filter { $0.schedule.contains(where: { $0.calendarWeekday == weekday }) }
-        let tracker = trackers[indexPath.item]
-        print("📦 Tracker: \(tracker.title)")
+        let trackersForToday = getTrackersForToday(in: category)
         
-        let isCompletedToday = completedTrackers.contains { record in
-            record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
+        guard indexPath.item < trackersForToday.count else {
+            return cell
         }
-        let totalCompletions = completedTrackers.filter { $0.trackerId == tracker.id }.count
-        
+
+        let tracker = trackersForToday[indexPath.item]
+
+        let isCompletedForSelectedDate = completedTrackers.contains {
+            $0.trackerId == tracker.id &&
+            Calendar.current.isDate($0.date, inSameDayAs: currentDate)
+        }
+
+        let totalCompletions = completedTrackers.filter {
+            $0.trackerId == tracker.id
+        }.count
+
+        let isFuture = isFutureDate(currentDate)
+
         cell.configure(
             with: tracker,
-            isCompleted: isCompletedToday,
-            isFutureDate: currentDate > Date(),
+            isCompleted: isCompletedForSelectedDate,
+            isFutureDate: isFuture,
             completionCount: totalCompletions
         )
-        
-        cell.completionHandler = { [weak self] isCompletedNew in
-            if isCompletedNew {
-                self?.completeTracker(tracker.id, date: self?.currentDate ?? Date())
-            } else {
-                self?.uncompleteTracker(trackerId: tracker.id, date: self?.currentDate ?? Date())
+
+        if !isFuture {
+            cell.completionHandler = { [weak self] isCompletedNew in
+                guard let self else { return }
+
+                if isCompletedNew {
+                    self.completeTracker(tracker.id, date: self.currentDate)
+                } else {
+                    self.uncompleteTracker(
+                        trackerId: tracker.id,
+                        date: self.currentDate
+                    )
+                }
+
+                collectionView.reloadItems(at: [indexPath])
             }
-            collectionView.reloadItems(at: [indexPath])
+        } else {
+            cell.completionHandler = nil
         }
-        
+
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView,
                       viewForSupplementaryElementOfKind kind: String,
                       at indexPath: IndexPath) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else {
+            return UICollectionReusableView()
+        }
+        
         let header = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
             withReuseIdentifier: TrackerCategoryHeader.reuseIdentifier,
             for: indexPath
         ) as! TrackerCategoryHeader
         
-        let weekday = Calendar.current.component(.weekday, from: currentDate)
-        let visibleCategories = filteredCategories.filter {
-            $0.trackers.contains(where: { tracker in
-                tracker.schedule.contains(where: { $0.calendarWeekday == weekday })
-            })
-        }
+        let visibleCategories = getVisibleCategories()
         guard indexPath.section < visibleCategories.count else {
             header.configure(with: "")
             return header
         }
+        
         header.configure(with: visibleCategories[indexPath.section].title)
         return header
     }
