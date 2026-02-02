@@ -21,7 +21,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         
         let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
-    //    let hasSeenOnboarding = false
         
         if hasSeenOnboarding {
             window?.rootViewController = MainTabBarController()

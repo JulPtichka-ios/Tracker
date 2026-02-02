@@ -21,7 +21,7 @@ final class TrackerCell: UICollectionViewCell {
     private let counterLabel = UILabel()
     private let completeButton = UIButton(type: .custom)
 
-    private var tracker: Tracker?
+    private var tracker: TrackerModel?
     private var isCompleted = false
     private var completionCount = 0
 
@@ -44,7 +44,7 @@ final class TrackerCell: UICollectionViewCell {
     // MARK: - Public
 
     func configure(
-        with tracker: Tracker,
+        with tracker: TrackerModel,
         isCompleted: Bool,
         isFutureDate: Bool,
         completionCount: Int

@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum WeekDay: CaseIterable {
+enum WeekDay: String, CaseIterable, Codable {
     case monday, tuesday, wednesday, thursday, friday, saturday, sunday
     
     var title: String {
@@ -21,9 +21,7 @@ enum WeekDay: CaseIterable {
         case .sunday: return "Воскресенье"
         }
     }
-}
-
-extension WeekDay {
+    
     var shortTitle: String {
         switch self {
         case .monday: return "Пн"
@@ -35,9 +33,7 @@ extension WeekDay {
         case .sunday: return "Вс"
         }
     }
-}
-
-extension WeekDay {
+    
     var calendarWeekday: Int {
         switch self {
         case .sunday: return 1
@@ -64,8 +60,7 @@ extension WeekDay {
     }
 }
 
-
-struct Tracker {
+struct TrackerModel {
     let id: UUID
     let title: String
     let color: String
