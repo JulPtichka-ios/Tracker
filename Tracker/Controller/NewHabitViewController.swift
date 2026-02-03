@@ -8,27 +8,272 @@
 import UIKit
 
 final class NewHabitViewController: UIViewController {
-    
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    
-    private let titleTextField = UITextField()
-    private let tabContainerView = UIView()
-    private var scheduleTitleLabel: UILabel?
-    private let errorLabel = UILabel()
-    
-    private let cancelButton = UIButton(type: .system)
-    private let createButton = UIButton(type: .system)
-    
+    // MARK: - Lazy Properties
+
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = true
+        scrollView.keyboardDismissMode = .onDrag
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
+    }()
+
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private lazy var titleSectionView: TitleSectionView = {
+        let view = TitleSectionView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private lazy var tabContainerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private lazy var emojiSectionView: EmojiSectionView = {
+        let view = EmojiSectionView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private lazy var colorSectionView: ColorSectionView = {
+        let view = ColorSectionView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private lazy var actionButtonsView: ActionButtonsView = {
+        let view = ActionButtonsView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    // MARK: - Other Properties
+
     private var selectedCategory: String?
     private var categoryTitleLabel: UILabel?
+    private var scheduleTitleLabel: UILabel?
     private var selectedSchedule: Set<WeekDay> = []
-    
-    var onSave: ((Tracker) -> Void)?
-    
-    // MARK: - Schedule text
-    
-    private var scheduleText: String {
+
+    var onSave: ((TrackerModel) -> Void)?
+
+    // MARK: - Lifecycle
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUI()
+        configureNavigationBar()
+        setupDelegates()
+        setDefaultSelections()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        let bottomInset = actionButtonsView.frame.height +
+            UIConstants.actionButtonsBottomPadding
+        scrollView.contentInset
+            .bottom = bottomInset
+    }
+
+    // MARK: - Setup Methods
+
+    private func setupUI() {
+        view.backgroundColor = UIColor(resource: .ypWhite)
+
+        setupActionButtons()
+        setupScrollView()
+        setupContentView()
+        setupTitleSection()
+        setupTabContainer()
+        setupEmojiSection()
+        setupColorSection()
+    }
+
+    private func configureNavigationBar() {
+        navigationController?.navigationBar.titleTextAttributes = [
+            .font: AppTextStyles.medium16,
+            .foregroundColor: UIColor(resource: .ypBlack)
+        ]
+        title = "Новая привычка"
+
+        let navigationBarAppearance = UINavigationBarAppearance()
+        navigationBarAppearance.configureWithOpaqueBackground()
+        navigationBarAppearance.backgroundColor = UIColor(resource: .ypWhite)
+        navigationBarAppearance.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 12)
+
+        navigationController?.navigationBar.standardAppearance = navigationBarAppearance
+    }
+
+    private func setupDelegates() {
+        titleSectionView.delegate = self
+        emojiSectionView.delegate = self
+        colorSectionView.delegate = self
+        actionButtonsView.delegate = self
+    }
+
+    private func setDefaultSelections() {
+        selectedCategory = "Полезные привычки"
+        updateCategoryButtonTitle()
+        updateCreateButtonState()
+        updateScheduleButtonTitle()
+
+        emojiSectionView.setSelectedEmoji("📱")
+        colorSectionView.setSelectedColor(MockData.colors.first)
+    }
+
+    // MARK: - Setup Components
+
+    private func setupScrollView() {
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsVerticalScrollIndicator = true
+        scrollView.keyboardDismissMode = .onDrag
+
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: actionButtonsView.topAnchor, constant: -8)
+        ])
+    }
+
+    private func setupContentView() {
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.backgroundColor = .clear
+
+        NSLayoutConstraint.activate([
+            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+
+            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+        ])
+    }
+
+    private func setupTitleSection() {
+        titleSectionView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(titleSectionView)
+
+        NSLayoutConstraint.activate([
+            titleSectionView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 24),
+            titleSectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            titleSectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20)
+        ])
+    }
+
+    private func setupTabContainer() {
+        tabContainerView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(tabContainerView)
+
+        NSLayoutConstraint.activate([
+            tabContainerView.topAnchor.constraint(equalTo: titleSectionView.bottomAnchor, constant: 8),
+            tabContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            tabContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            tabContainerView.heightAnchor.constraint(equalToConstant: 150)
+        ])
+
+        setupTabContainerContent()
+    }
+
+    private func setupEmojiSection() {
+        emojiSectionView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(emojiSectionView)
+
+        NSLayoutConstraint.activate([
+            emojiSectionView.topAnchor.constraint(equalTo: tabContainerView.bottomAnchor, constant: 8),
+            emojiSectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            emojiSectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            emojiSectionView.heightAnchor.constraint(equalToConstant: 220)
+        ])
+    }
+
+    private func setupColorSection() {
+        colorSectionView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(colorSectionView)
+
+        NSLayoutConstraint.activate([
+            colorSectionView.topAnchor.constraint(equalTo: emojiSectionView.bottomAnchor, constant: 8),
+            colorSectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            colorSectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            colorSectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16),
+            colorSectionView.heightAnchor.constraint(equalToConstant: 180)
+        ])
+    }
+
+    private func setupActionButtons() {
+        actionButtonsView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(actionButtonsView)
+
+        NSLayoutConstraint.activate([
+            actionButtonsView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            actionButtonsView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            actionButtonsView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            actionButtonsView.heightAnchor.constraint(equalToConstant: 60)
+        ])
+    }
+
+    // MARK: - Helper Methods
+
+    private func updateCreateButtonState() {
+        let title = titleSectionView.getTitle()
+        let hasValidTitle = title != nil && !title!.isEmpty
+
+        let isValid = hasValidTitle &&
+            !selectedSchedule.isEmpty &&
+            selectedCategory != nil && !selectedCategory!.isEmpty &&
+            emojiSectionView.getSelectedEmoji() != nil &&
+            colorSectionView.getSelectedColor() != nil
+
+        actionButtonsView.setCreateButtonEnabled(isValid)
+    }
+
+    private func updateScheduleButtonTitle() {
+        guard let titleLabel = scheduleTitleLabel else { return }
+
+        let scheduleText = getScheduleText()
+        let fullText = scheduleText == "Расписание" || scheduleText.isEmpty ? "Расписание" : "Расписание\n\(scheduleText)"
+
+        let attributedText = NSAttributedStringBuilder.buildScheduleText(
+            fullText: fullText,
+            primaryFont: AppTextStyles.regular17,
+            primaryColor: UIColor(resource: .ypBlack),
+            secondaryFont: AppTextStyles.regular17,
+            secondaryColor: UIColor(resource: .ypGray)
+        )
+
+        titleLabel.attributedText = attributedText
+        titleLabel.numberOfLines = 2
+    }
+
+    private func updateCategoryButtonTitle() {
+        guard let titleLabel = categoryTitleLabel else { return }
+
+        let fullText = selectedCategory == nil || selectedCategory?
+            .isEmpty == true ? "Категория" : "Категория\n\(selectedCategory!)"
+
+        let attributedText = NSAttributedStringBuilder.buildScheduleText(
+            fullText: fullText,
+            primaryFont: AppTextStyles.regular17,
+            primaryColor: UIColor(resource: .ypBlack),
+            secondaryFont: AppTextStyles.regular17,
+            secondaryColor: UIColor(resource: .ypGray)
+        )
+
+        titleLabel.attributedText = attributedText
+        titleLabel.numberOfLines = 2
+    }
+
+    private func getScheduleText() -> String {
         if selectedSchedule.count == WeekDay.allCases.count {
             return "Каждый день"
         } else if selectedSchedule.isEmpty {
@@ -41,131 +286,14 @@ final class NewHabitViewController: UIViewController {
             return sortedDays.map { $0.shortTitle }.joined(separator: ", ")
         }
     }
-    
-    // MARK: - Lifecycle
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupUI()
-        navigationController?.navigationBar.titleTextAttributes = [
-            .font: AppTextStyles.medium16,
-            .foregroundColor: UIColor(named: "ypBlack") ?? .black
-        ]
-        title = "Новая привычка"
-        
-        let navigationBarAppearance = UINavigationBarAppearance()
-        navigationBarAppearance.configureWithOpaqueBackground()
-        navigationBarAppearance.backgroundColor = UIColor(named: "ypWhite") ?? .white
-        navigationBarAppearance.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 12)
-        
-        navigationController?.navigationBar.standardAppearance = navigationBarAppearance
-        
-        view.backgroundColor = UIColor(named: "ypWhite") ?? .white
-        titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        selectedCategory = "Полезные привычки"
-        updateCategoryButtonTitle()
-        updateCreateButtonState()
-        updateScheduleButtonTitle()
-    }
-    
-    // MARK: - Setup UI
-    
-    private func setupUI() {
-        setupScrollView()
-        setupContentView()
-        setupTitleTextField()
-        setupTabContainer()
-        setupActionButtons()
-    }
-    
-    private func setupScrollView() {
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.showsVerticalScrollIndicator = true
-        scrollView.keyboardDismissMode = .onDrag
-        
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.keyboardLayoutGuide.topAnchor)
-        ])
-    }
-    
-    private func setupContentView() {
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.backgroundColor = UIColor.clear
-        
-        NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: 800)
-        ])
-    }
-    
-    private func setupTitleTextField() {
-        titleTextField.placeholder = "Введите название трекера"
-        titleTextField.font = AppTextStyles.regular17
-        titleTextField.borderStyle = .none
-        titleTextField.layer.cornerRadius = 18
-        titleTextField.clipsToBounds = true
-        titleTextField.backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
-        titleTextField.delegate = self
-        
-        let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 20))
-        titleTextField.leftView = leftPaddingView
-        titleTextField.leftViewMode = .always
-        
-        // RightView с крестиком
-        let clearButton = UIButton(type: .custom)
-        clearButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-        clearButton.tintColor = .gray
-        clearButton.imageView?.contentMode = .scaleAspectFit
-        clearButton.contentHorizontalAlignment = .center
-        clearButton.contentVerticalAlignment = .center
-        clearButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-        clearButton.addTarget(self, action: #selector(clearTextField), for: .touchUpInside)
-        clearButton.isHidden = true
-        clearButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: -10, bottom: 0, right: 8)
+}
 
-        titleTextField.rightView = clearButton
-        titleTextField.rightViewMode = .always
-        
-        // Error label
-        errorLabel.text = "Ограничение 38 символов"
-        errorLabel.font = AppTextStyles.regular17
-        errorLabel.textColor = .ypRed
-        errorLabel.textAlignment = .center
-        errorLabel.isHidden = true
-        
-        titleTextField.translatesAutoresizingMaskIntoConstraints = false
-        errorLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(titleTextField)
-        contentView.addSubview(errorLabel)
-        
-        NSLayoutConstraint.activate([
-            titleTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 38),
-            titleTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            titleTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            titleTextField.heightAnchor.constraint(equalToConstant: 75),
-            
-            errorLabel.topAnchor.constraint(equalTo: titleTextField.bottomAnchor, constant: 8),
-            errorLabel.leadingAnchor.constraint(equalTo: titleTextField.leadingAnchor),
-            errorLabel.trailingAnchor.constraint(equalTo: titleTextField.trailingAnchor),
-            errorLabel.heightAnchor.constraint(equalToConstant: 20)
-        ])
-    }
-    
-    // MARK: - Контейнер с кнопками
-    
-    private func setupTabContainer() {
+// MARK: - Tab Container Setup
+
+extension NewHabitViewController {
+    private func setupTabContainerContent() {
         let containerBackground = UIView()
-        containerBackground.backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
+        containerBackground.backgroundColor = UIColor(resource: .ypBackground)
         containerBackground.layer.cornerRadius = 16
         containerBackground.layer.masksToBounds = true
         containerBackground.translatesAutoresizingMaskIntoConstraints = false
@@ -176,65 +304,8 @@ final class NewHabitViewController: UIViewController {
         buttonStack.distribution = .fillEqually
         buttonStack.translatesAutoresizingMaskIntoConstraints = false
 
-        let categoryContainer = UIView()
-        categoryContainer.backgroundColor = .clear
-        categoryContainer.translatesAutoresizingMaskIntoConstraints = false
-        let categoryTapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapCategory))
-        categoryContainer.addGestureRecognizer(categoryTapGesture)
-        categoryContainer.isUserInteractionEnabled = true
-
-        let categoryLabel = UILabel()
-        categoryLabel.numberOfLines = 2
-        categoryLabel.lineBreakMode = .byWordWrapping
-        categoryLabel.text = "Категория"
-        categoryTitleLabel = categoryLabel
-
-        let categoryArrow = UIImageView(image: UIImage(systemName: "chevron.right")?.withRenderingMode(.alwaysTemplate))
-        categoryArrow.tintColor = UIColor(named: "ypGray") ?? .systemGray
-        categoryArrow.contentMode = .scaleAspectFit
-
-        let categoryContentStack = UIStackView(arrangedSubviews: [categoryLabel, categoryArrow])
-        categoryContentStack.axis = .horizontal
-        categoryContentStack.spacing = 8
-        categoryContentStack.alignment = .center
-        categoryContentStack.distribution = .fill
-        categoryContentStack.translatesAutoresizingMaskIntoConstraints = false
-
-        categoryContainer.addSubview(categoryContentStack)
-
-        categoryLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-        categoryLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        categoryArrow.setContentCompressionResistancePriority(.required, for: .horizontal)
-
-        let scheduleContainer = UIView()
-        scheduleContainer.backgroundColor = .clear
-        scheduleContainer.translatesAutoresizingMaskIntoConstraints = false
-        let scheduleTapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSchedule))
-        scheduleContainer.addGestureRecognizer(scheduleTapGesture)
-        scheduleContainer.isUserInteractionEnabled = true
-
-        let scheduleLabel = UILabel()
-        scheduleLabel.numberOfLines = 2
-        scheduleLabel.lineBreakMode = .byWordWrapping
-        scheduleLabel.text = "Расписание"
-        scheduleTitleLabel = scheduleLabel
-
-        let scheduleArrow = UIImageView(image: UIImage(systemName: "chevron.right")?.withRenderingMode(.alwaysTemplate))
-        scheduleArrow.tintColor = UIColor(named: "ypGray") ?? .systemGray
-        scheduleArrow.contentMode = .scaleAspectFit
-
-        let scheduleContentStack = UIStackView(arrangedSubviews: [scheduleLabel, scheduleArrow])
-        scheduleContentStack.axis = .horizontal
-        scheduleContentStack.spacing = 8
-        scheduleContentStack.alignment = .center
-        scheduleContentStack.distribution = .fill
-        scheduleContentStack.translatesAutoresizingMaskIntoConstraints = false
-
-        scheduleContainer.addSubview(scheduleContentStack)
-
-        scheduleLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-        scheduleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        scheduleArrow.setContentCompressionResistancePriority(.required, for: .horizontal)
+        let categoryContainer = createCategoryContainer()
+        let scheduleContainer = createScheduleContainer()
 
         let divider = UIView()
         divider.backgroundColor = UIColor(named: "ypBlack")?.withAlphaComponent(0.3)
@@ -242,39 +313,23 @@ final class NewHabitViewController: UIViewController {
 
         buttonStack.addArrangedSubview(categoryContainer)
         buttonStack.addArrangedSubview(scheduleContainer)
-
         buttonStack.setCustomSpacing(0.5, after: categoryContainer)
 
         containerBackground.addSubview(buttonStack)
+        containerBackground.addSubview(divider)
         tabContainerView.addSubview(containerBackground)
 
-        containerBackground.addSubview(divider)
-
         NSLayoutConstraint.activate([
-            categoryContentStack.topAnchor.constraint(equalTo: categoryContainer.topAnchor, constant: 16),
-            categoryContentStack.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor, constant: 20),
-            categoryContentStack.trailingAnchor.constraint(equalTo: categoryContainer.trailingAnchor, constant: -20),
-            categoryContentStack.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor, constant: -16),
-            categoryArrow.widthAnchor.constraint(equalToConstant: 16),
-            categoryArrow.heightAnchor.constraint(equalToConstant: 16),
-            
-            scheduleContentStack.topAnchor.constraint(equalTo: scheduleContainer.topAnchor, constant: 16),
-            scheduleContentStack.leadingAnchor.constraint(equalTo: scheduleContainer.leadingAnchor, constant: 20),
-            scheduleContentStack.trailingAnchor.constraint(equalTo: scheduleContainer.trailingAnchor, constant: -20),
-            scheduleContentStack.bottomAnchor.constraint(equalTo: scheduleContainer.bottomAnchor, constant: -16),
-            scheduleArrow.widthAnchor.constraint(equalToConstant: 16),
-            scheduleArrow.heightAnchor.constraint(equalToConstant: 16),
-            
             divider.leadingAnchor.constraint(equalTo: containerBackground.leadingAnchor, constant: 20),
             divider.trailingAnchor.constraint(equalTo: containerBackground.trailingAnchor, constant: -20),
             divider.centerYAnchor.constraint(equalTo: containerBackground.centerYAnchor),
             divider.heightAnchor.constraint(equalToConstant: 0.5),
-            
+
             buttonStack.topAnchor.constraint(equalTo: containerBackground.topAnchor),
             buttonStack.leadingAnchor.constraint(equalTo: containerBackground.leadingAnchor),
             buttonStack.trailingAnchor.constraint(equalTo: containerBackground.trailingAnchor),
             buttonStack.bottomAnchor.constraint(equalTo: containerBackground.bottomAnchor),
-            
+
             containerBackground.topAnchor.constraint(equalTo: tabContainerView.topAnchor),
             containerBackground.leadingAnchor.constraint(equalTo: tabContainerView.leadingAnchor),
             containerBackground.trailingAnchor.constraint(equalTo: tabContainerView.trailingAnchor),
@@ -285,105 +340,103 @@ final class NewHabitViewController: UIViewController {
             categoryContainer.heightAnchor.constraint(equalToConstant: 75),
             scheduleContainer.heightAnchor.constraint(equalToConstant: 75)
         ])
+    }
 
-        tabContainerView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(tabContainerView)
+    private func createCategoryContainer() -> UIView {
+        let container = UIView()
+        container.backgroundColor = .clear
+        container.translatesAutoresizingMaskIntoConstraints = false
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapCategory))
+        container.addGestureRecognizer(tapGesture)
+        container.isUserInteractionEnabled = true
+
+        let label = UILabel()
+        label.numberOfLines = 2
+        label.lineBreakMode = .byWordWrapping
+        label.text = "Категория"
+        categoryTitleLabel = label
+
+        let arrow = UIImageView(image: UIImage(systemName: "chevron.right")?.withRenderingMode(.alwaysTemplate))
+        arrow.tintColor = UIColor(resource: .ypGray)
+        arrow.contentMode = .scaleAspectFit
+
+        let stack = UIStackView(arrangedSubviews: [label, arrow])
+        stack.axis = .horizontal
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.distribution = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        container.addSubview(stack)
+
+        label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        label.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        arrow.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         NSLayoutConstraint.activate([
-            tabContainerView.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 8),
-            tabContainerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            tabContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            tabContainerView.heightAnchor.constraint(equalToConstant: 150)
+            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 16),
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
+            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -16),
+            arrow.widthAnchor.constraint(equalToConstant: 16),
+            arrow.heightAnchor.constraint(equalToConstant: 16)
         ])
 
-        updateCategoryButtonTitle()
-        updateScheduleButtonTitle()
+        return container
     }
-    
-    private func setupActionButtons() {
-        var cancelConfig = UIButton.Configuration.plain()
-        cancelConfig.title = "Отменить"
-        cancelConfig.baseForegroundColor = UIColor(named: "ypRed") ?? .systemRed
-        cancelConfig.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
-        
-        cancelConfig.attributedTitle = AttributedString(
-            AppTextStyles.attributed(
-                "Отменить",
-                style: AppTextStyles.medium16,
-                color: UIColor(named: "ypRed") ?? .systemRed
-            )
-        )
 
-        cancelButton.configuration = cancelConfig
-        cancelButton.backgroundColor = .clear
-        cancelButton.layer.cornerRadius = 16
-        cancelButton.layer.borderWidth = 1
-        cancelButton.layer.borderColor = (UIColor(named: "ypRed") ?? .systemRed).cgColor
-        cancelButton.addTarget(self, action: #selector(didTapCancel), for: .touchUpInside)
-        
-        createButton.setTitle("Создать", for: .normal)
-        createButton.setTitleColor(.white, for: .normal)
-        createButton.titleLabel?.font = AppTextStyles.medium16
-        createButton.backgroundColor = UIColor(named: "ypGray")
-        createButton.layer.cornerRadius = 16
-        createButton.isEnabled = false
-        createButton.addTarget(self, action: #selector(didTapCreate), for: .touchUpInside)
-        
-        let buttonStack = UIStackView(arrangedSubviews: [cancelButton, createButton])
-        buttonStack.axis = .horizontal
-        buttonStack.spacing = 12
-        buttonStack.distribution = .fillEqually
-        
-        buttonStack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(buttonStack)
-        
+    private func createScheduleContainer() -> UIView {
+        let container = UIView()
+        container.backgroundColor = .clear
+        container.translatesAutoresizingMaskIntoConstraints = false
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSchedule))
+        container.addGestureRecognizer(tapGesture)
+        container.isUserInteractionEnabled = true
+
+        let label = UILabel()
+        label.numberOfLines = 2
+        label.lineBreakMode = .byWordWrapping
+        label.text = "Расписание"
+        scheduleTitleLabel = label
+
+        let arrow = UIImageView(image: UIImage(systemName: "chevron.right")?.withRenderingMode(.alwaysTemplate))
+        arrow.tintColor = UIColor(resource: .ypGray)
+        arrow.contentMode = .scaleAspectFit
+
+        let stack = UIStackView(arrangedSubviews: [label, arrow])
+        stack.axis = .horizontal
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.distribution = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        container.addSubview(stack)
+
+        label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        label.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        arrow.setContentCompressionResistancePriority(.required, for: .horizontal)
+
         NSLayoutConstraint.activate([
-            buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            buttonStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            buttonStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            buttonStack.heightAnchor.constraint(equalToConstant: 60)
+            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 16),
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
+            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -16),
+            arrow.widthAnchor.constraint(equalToConstant: 16),
+            arrow.heightAnchor.constraint(equalToConstant: 16)
         ])
-    }
-    
-    // MARK: - Schedule button appearance
-    private func updateScheduleButtonTitle() {
-        guard let titleLabel = scheduleTitleLabel else { return }
-        
-        let fullText = scheduleText == "Расписание" || scheduleText.isEmpty ? "Расписание" : "Расписание\n\(scheduleText)"
-        
-        titleLabel.text = fullText
-        titleLabel.numberOfLines = 2
-        
-        guard fullText.contains("\n"), let newlineIndex = fullText.firstIndex(of: "\n") else {
-            titleLabel.font = AppTextStyles.regular17
-            titleLabel.textColor = UIColor(named: "ypBlack") ?? .black
-            return
-        }
-        
-        let lineBreakIndex = newlineIndex.utf16Offset(in: fullText)
-        let secondaryLength = fullText.count - lineBreakIndex - 1
-        
-        let attrText = NSMutableAttributedString(string: fullText)
-        attrText.addAttribute(.font, value: AppTextStyles.regular17,
-                              range: NSRange(location: 0, length: lineBreakIndex))
-        attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypBlack") ?? .black,
-                              range: NSRange(location: 0, length: lineBreakIndex))
-        
-        attrText.addAttribute(.font, value: AppTextStyles.regular17,
-                              range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))
-        attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypGray") ?? .systemGray,
-                              range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))
-        
-        titleLabel.attributedText = attrText
-    }
 
-    // MARK: - Actions
-    
+        return container
+    }
+}
+
+// MARK: - Actions
+
+extension NewHabitViewController {
     @objc private func didTapCategory() {
         updateCategoryButtonTitle()
         print("TODO: экран категорий")
     }
-    
+
     @objc private func didTapSchedule() {
         print("✅ Schedule button tapped!")
         let scheduleVC = ScheduleViewController()
@@ -396,109 +449,72 @@ final class NewHabitViewController: UIViewController {
         }
         navigationController?.pushViewController(scheduleVC, animated: true)
     }
-    
-    @objc private func didTapCancel() {
-        dismiss(animated: true)
-    }
-    
-    @objc private func didTapCreate() {
-        guard let title = titleTextField.text, !title.isEmpty, !selectedSchedule.isEmpty else { return }
-        
-        let tracker = Tracker(
+
+    private func createTracker() {
+        guard let title = titleSectionView.getTitle(),
+              !selectedSchedule.isEmpty,
+              let emoji = emojiSectionView.getSelectedEmoji(),
+              let color = colorSectionView.getSelectedColor() else { return }
+
+        let colorName = MockData.getColorName(for: color) ?? "ColorSelection1"
+
+        let tracker = TrackerModel(
             id: UUID(),
             title: title,
-            color: "ColorSelection13",
-            emoji: "📱",
+            color: colorName,
+            emoji: emoji,
             schedule: Array(selectedSchedule)
         )
-        
+
         onSave?(tracker)
         dismiss(animated: true)
     }
-    
-    @objc private func textFieldDidChange() {
-        let text = titleTextField.text ?? ""
-        print("Text length: \(text.count)")
-        print("RightView: \(String(describing: titleTextField.rightView))")
-        
-        titleTextField.rightView?.isHidden = text.isEmpty
-        showError(text.count >= 38)
+}
+
+// MARK: - TitleSectionViewDelegate
+
+extension NewHabitViewController: TitleSectionViewDelegate {
+    func titleDidChange(_ text: String) {
         updateCreateButtonState()
     }
 
-    @objc private func clearTextField() {
-        titleTextField.text = ""
-        titleTextField.rightView?.isHidden = true
-        showError(false)
-        titleTextField.becomeFirstResponder()
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 
-    private func showError(_ show: Bool) {
-        errorLabel.isHidden = !show
-        if show {
-            let shake = CABasicAnimation(keyPath: "position")
-            shake.duration = 0.1
-            shake.repeatCount = 2
-            shake.autoreverses = true
-            shake.fromValue = NSValue(cgPoint: CGPoint(x: titleTextField.center.x - 5, y: titleTextField.center.y))
-            shake.toValue = NSValue(cgPoint: CGPoint(x: titleTextField.center.x + 5, y: titleTextField.center.y))
-            titleTextField.layer.add(shake, forKey: "shake")
-        }
-    }
-
-    // MARK: - Validation
-    
-    private func updateCreateButtonState() {
-        let isValid = !(titleTextField.text ?? "").isEmpty &&
-                      !selectedSchedule.isEmpty &&
-                      selectedCategory != nil && !selectedCategory!.isEmpty
-        createButton.isEnabled = isValid
-        createButton.backgroundColor = isValid ? UIColor(named: "ypBlack") : UIColor(named: "ypGray")
-    }
-    
-    // MARK: - Category button appearance
-    private func updateCategoryButtonTitle() {
-        guard let titleLabel = categoryTitleLabel else { return }
-        
-        let fullText = selectedCategory == nil || selectedCategory?.isEmpty == true ? "Категория" : "Категория\n\(selectedCategory!)"
-        
-        titleLabel.text = fullText
-        titleLabel.numberOfLines = 2
-        
-        guard fullText.contains("\n"), let newlineIndex = fullText.firstIndex(of: "\n") else {
-            titleLabel.font = AppTextStyles.regular17
-            titleLabel.textColor = UIColor(named: "ypBlack") ?? .black
-            return
-        }
-        
-        let lineBreakIndex = newlineIndex.utf16Offset(in: fullText)
-        let secondaryLength = fullText.count - lineBreakIndex - 1
-        
-        let attrText = NSMutableAttributedString(string: fullText)
-        attrText.addAttribute(.font, value: AppTextStyles.regular17,
-                              range: NSRange(location: 0, length: lineBreakIndex))
-        attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypBlack") ?? .black,
-                              range: NSRange(location: 0, length: lineBreakIndex))
-        
-        attrText.addAttribute(.font, value: AppTextStyles.regular17,
-                              range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))
-        attrText.addAttribute(.foregroundColor, value: UIColor(named: "ypGray") ?? .systemGray,
-                              range: NSRange(location: lineBreakIndex + 1, length: secondaryLength))
-        
-        titleLabel.attributedText = attrText
-    }
-}
-
-// MARK: - UITextFieldDelegate
-extension NewHabitViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentText = textField.text ?? ""
         guard let stringRange = Range(range, in: currentText) else { return false }
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
-        
-        showError(updatedText.count >= 38)
+
         updateCreateButtonState()
-        
-        return updatedText.count <= 38
+        return updatedText.count <= UIConstants.maxTitleLength
+    }
+}
+
+// MARK: - EmojiSectionViewDelegate & ColorSectionViewDelegate
+
+extension NewHabitViewController: EmojiSectionViewDelegate, ColorSectionViewDelegate {
+    func didSelectEmoji(_ emoji: String) {
+        print("Selected emoji: \(emoji)")
+        updateCreateButtonState()
+    }
+
+    func didSelectColor(_ color: UIColor) {
+        print("Selected color: \(color)")
+        updateCreateButtonState()
+    }
+}
+
+// MARK: - ActionButtonsViewDelegate
+
+extension NewHabitViewController: ActionButtonsViewDelegate {
+    func didTapCancelButton() {
+        dismiss(animated: true)
+    }
+
+    func didTapCreateButton() {
+        createTracker()
     }
 }

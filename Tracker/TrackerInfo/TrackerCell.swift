@@ -21,7 +21,7 @@ final class TrackerCell: UICollectionViewCell {
     private let counterLabel = UILabel()
     private let completeButton = UIButton(type: .custom)
 
-    private var tracker: Tracker?
+    private var tracker: TrackerModel?
     private var isCompleted = false
     private var completionCount = 0
 
@@ -32,7 +32,7 @@ final class TrackerCell: UICollectionViewCell {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
 
     override func layoutSubviews() {
@@ -44,7 +44,7 @@ final class TrackerCell: UICollectionViewCell {
     // MARK: - Public
 
     func configure(
-        with tracker: Tracker,
+        with tracker: TrackerModel,
         isCompleted: Bool,
         isFutureDate: Bool,
         completionCount: Int
@@ -90,7 +90,7 @@ final class TrackerCell: UICollectionViewCell {
         bottomContainer.translatesAutoresizingMaskIntoConstraints = false
 
         emojiLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        emojiLabel.textColor = UIColor(named: "ypBlack") ?? .black
+        emojiLabel.textColor = UIColor(resource: .ypBlack)
         emojiLabel.textAlignment = .center
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
 
@@ -114,13 +114,13 @@ final class TrackerCell: UICollectionViewCell {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         counterLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        counterLabel.textColor = UIColor(named: "ypBlack") ?? .label
+        counterLabel.textColor = UIColor(resource: .ypBlack)
         counterLabel.textAlignment = .left
         counterLabel.translatesAutoresizingMaskIntoConstraints = false
 
         completeButton.layer.cornerRadius = 17
         completeButton.layer.borderWidth = 0
-        completeButton.tintColor = UIColor(named: "ypWhite") ?? .white
+        completeButton.tintColor = UIColor(resource: .ypWhite)
         completeButton.translatesAutoresizingMaskIntoConstraints = false
         completeButton.addTarget(self, action: #selector(didTapComplete), for: .touchUpInside)
         

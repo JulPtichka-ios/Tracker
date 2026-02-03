@@ -11,7 +11,7 @@ class MainTabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("✅ MainTabBarController: viewDidLoad")
-        view.backgroundColor = UIColor(named: "ypWhite")
+        view.backgroundColor = UIColor(resource: .ypWhite)
         setupTabBar()
     }
 
@@ -39,9 +39,9 @@ class MainTabBarController: UITabBarController {
         viewControllers = [trackersNav, statisticsNav]
         
         // Стили TabBar
-        tabBar.backgroundColor = UIColor(named: "ypBackground")
-        tabBar.tintColor = UIColor(named: "ypBlue")
-        tabBar.unselectedItemTintColor = UIColor(named: "ypGray")
+        tabBar.backgroundColor = UIColor(resource: .ypBackground)
+        tabBar.tintColor = UIColor(resource: .ypBlue)
+        tabBar.unselectedItemTintColor = UIColor(resource: .ypGray)
         tabBar.layer.borderColor = UIColor(named: "ypGray")?.withAlphaComponent(0.3).cgColor
         tabBar.layer.borderWidth = 0.5
         tabBar.itemPositioning = .fill

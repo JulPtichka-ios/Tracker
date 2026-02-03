@@ -18,7 +18,7 @@ final class ScheduleViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Расписание"
-        view.backgroundColor = UIColor(named: "ypWhite") ?? .white
+        view.backgroundColor = UIColor(resource: .ypWhite)
         navigationItem.hidesBackButton = true
         setupNavigationTitle()
         setupLayout()
@@ -32,13 +32,13 @@ final class ScheduleViewController: UIViewController {
     private func setupNavigationTitle() {
         let titleAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 16, weight: .medium),
-            .foregroundColor: UIColor(named: "ypBlack") ?? .black
+            .foregroundColor: UIColor(resource: .ypBlack)
         ]
         navigationController?.navigationBar.titleTextAttributes = titleAttributes
     }
 
     private func setupLayout() {
-        contentView.backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
+        contentView.backgroundColor = UIColor(resource: .ypBackground)
         contentView.layer.cornerRadius = 16
         contentView.layer.masksToBounds = true
         contentView.translatesAutoresizingMaskIntoConstraints = false
@@ -54,7 +54,7 @@ final class ScheduleViewController: UIViewController {
         doneButton.setTitle("Готово", for: .normal)
         doneButton.setTitleColor(.white, for: .normal)
         doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        doneButton.backgroundColor = UIColor(named: "ypBlack")
+        doneButton.backgroundColor = UIColor(resource: .ypBlack)
         doneButton.layer.cornerRadius = 16
         doneButton.layer.masksToBounds = true
         doneButton.addTarget(self, action: #selector(didTapDone), for: .touchUpInside)
@@ -111,10 +111,10 @@ final class ScheduleCell: UITableViewCell {
 
     private func setupUI() {
         dayLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        dayLabel.textColor = UIColor(named: "ypBlack") ?? .label
+        dayLabel.textColor = UIColor(resource: .ypBlack)
         dayLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        daySwitch.onTintColor = UIColor(named: "ypBlue") ?? .systemBlue
+        daySwitch.onTintColor = UIColor(resource: .ypBlue)
         daySwitch.addTarget(self, action: #selector(switchToggled), for: .valueChanged)
         daySwitch.translatesAutoresizingMaskIntoConstraints = false
         
@@ -140,7 +140,7 @@ final class ScheduleCell: UITableViewCell {
         ])
 
         selectionStyle = .none
-        backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
+        backgroundColor = UIColor(resource: .ypBackground)
     }
 
     override func prepareForReuse() {
