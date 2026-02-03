@@ -39,7 +39,7 @@ final class TitleSectionView: UIView {
         titleTextField.borderStyle = .none
         titleTextField.layer.cornerRadius = 18
         titleTextField.clipsToBounds = true
-        titleTextField.backgroundColor = UIColor(named: "ypBackground") ?? .systemGray6
+        titleTextField.backgroundColor = UIColor(resource: .ypBackground)
         
         let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 20))
         titleTextField.leftView = leftPaddingView
@@ -118,7 +118,7 @@ final class TitleSectionView: UIView {
         titleTextField.rightView?.isHidden = text.isEmpty
         delegate?.titleDidChange(text)
         
-        showError(text.count >= 38)
+        showError(text.count >= UIConstants.maxTitleLength)
     }
 
     @objc private func clearTextField() {

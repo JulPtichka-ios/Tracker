@@ -21,7 +21,7 @@ final class ActionButtonsView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = UIColor(named: "ypWhite") ?? .white
+        backgroundColor = UIColor(resource: .ypWhite)
         setupUI()
     }
     
@@ -38,14 +38,14 @@ final class ActionButtonsView: UIView {
     private func setupCancelButton() {
         var cancelConfig = UIButton.Configuration.plain()
         cancelConfig.title = "Отменить"
-        cancelConfig.baseForegroundColor = UIColor(named: "ypRed") ?? .systemRed
+        cancelConfig.baseForegroundColor = UIColor(resource: .ypRed)
         cancelConfig.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
         
         cancelConfig.attributedTitle = AttributedString(
             AppTextStyles.attributed(
                 "Отменить",
                 style: AppTextStyles.medium16,
-                color: UIColor(named: "ypRed") ?? .systemRed
+                color: UIColor(resource: .ypRed)
             )
         )
 
@@ -53,7 +53,7 @@ final class ActionButtonsView: UIView {
         cancelButton.backgroundColor = .clear
         cancelButton.layer.cornerRadius = 16
         cancelButton.layer.borderWidth = 1
-        cancelButton.layer.borderColor = (UIColor(named: "ypRed") ?? .systemRed).cgColor
+        cancelButton.layer.borderColor = (UIColor(resource: .ypRed)).cgColor
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
         
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
@@ -63,7 +63,7 @@ final class ActionButtonsView: UIView {
         createButton.setTitle("Создать", for: .normal)
         createButton.setTitleColor(.white, for: .normal)
         createButton.titleLabel?.font = AppTextStyles.medium16
-        createButton.backgroundColor = UIColor(named: "ypGray")
+        createButton.backgroundColor = UIColor(resource: .ypGray)
         createButton.layer.cornerRadius = 16
         createButton.isEnabled = false
         createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
@@ -95,7 +95,7 @@ final class ActionButtonsView: UIView {
     
     func setCreateButtonEnabled(_ enabled: Bool) {
         createButton.isEnabled = enabled
-        createButton.backgroundColor = enabled ? UIColor(named: "ypBlack") : UIColor(named: "ypGray")
+        createButton.backgroundColor = enabled ? UIColor(resource: .ypBlack) : UIColor(resource: .ypGray)
     }
     
     // MARK: - Actions

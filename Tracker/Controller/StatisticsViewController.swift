@@ -17,7 +17,7 @@ class StatisticsViewController: UIViewController {
         stack.translatesAutoresizingMaskIntoConstraints = false
         
         let cryImage = UIImageView(image: UIImage(named: "emptyCry"))
-        cryImage.tintColor = UIColor(named: "ypGray")
+        cryImage.tintColor = UIColor(resource: .ypGray)
         cryImage.contentMode = .scaleAspectFit
         cryImage.widthAnchor.constraint(equalToConstant: 80).isActive = true
         cryImage.heightAnchor.constraint(equalToConstant: 80).isActive = true
@@ -27,7 +27,7 @@ class StatisticsViewController: UIViewController {
             "Анализируем твою активность...\n\nСтатистика будет готова, когда ты начнешь трекать привычки",
             style: AppTextStyles.medium12,
             lineHeight: 12,
-            color: UIColor(named: "ypGray") ?? .systemGray
+            color: UIColor(resource: .ypGray)
         )
         label.textAlignment = .center
         label.numberOfLines = 0
@@ -42,13 +42,13 @@ class StatisticsViewController: UIViewController {
         print("✅ StatisticsViewController: viewDidLoad")
         
         title = "Статистика"
-        view.backgroundColor = UIColor(named: "ypWhite") ?? .systemBackground
+        view.backgroundColor = UIColor(resource: .ypWhite)
         
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.largeTitleTextAttributes = [
             .font: AppTextStyles.bold34,
-            .foregroundColor: UIColor(named: "ypBlack") ?? .label
+            .foregroundColor: UIColor(resource: .ypBlack)
         ]
         
         setupPlaceholder()
