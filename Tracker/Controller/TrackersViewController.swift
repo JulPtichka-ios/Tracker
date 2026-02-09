@@ -102,7 +102,6 @@ class TrackersViewController: UIViewController {
         super.viewDidLoad()
         print("✅ TrackersViewController: viewDidLoad")
 
-        // Настраиваем делегаты
         trackerStore.delegate = self
         categoryStore.delegate = self
         recordStore.delegate = self
@@ -117,9 +116,7 @@ class TrackersViewController: UIViewController {
             .foregroundColor: UIColor(resource: .ypBlack)
         ]
 
-        // Загружаем тестовые данные при первом запуске
         if categoryStore.categories.isEmpty {
-            setupInitialData()
         }
 
         setupPlusButton()
@@ -127,27 +124,6 @@ class TrackersViewController: UIViewController {
         setupSearchController()
         setupCollectionView()
         updateUI()
-    }
-
-    // MARK: - Setup Methods
-    private func setupInitialData() {
-        print("🧪 Setting up initial data...")
-
-        let categoryName = MockData.defaultCategoryName
-
-        do {
-            let categoryId = try categoryStore.createCategoryIfNeeded(with: categoryName)
-
-            print("✅ Creating \(MockData.testTrackers.count) test trackers")
-
-            for tracker in MockData.testTrackers {
-                try trackerStore.addTracker(tracker, to: categoryId)
-            }
-
-            print("✅ Initial data setup complete")
-        } catch {
-            print("❌ Failed to setup initial data: \(error)")
-        }
     }
 
     // MARK: - Layout
@@ -276,8 +252,13 @@ class TrackersViewController: UIViewController {
 
     @objc private func didTapAdd() {
         let newHabitVC = NewHabitViewController()
+        
         newHabitVC.onSave = { [weak self] tracker in
-            self?.addTracker(tracker, to: MockData.defaultCategoryName)
+            guard let categoryName = newHabitVC.currentSelectedCategory else {
+                print("❌ Категория не выбрана")
+                return
+            }
+            self?.addTracker(tracker, to: categoryName)
         }
 
         let navController = UINavigationController(rootViewController: newHabitVC)

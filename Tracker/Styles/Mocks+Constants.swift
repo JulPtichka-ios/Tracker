@@ -29,8 +29,6 @@ enum MockData {
         return colors
     }()
 
-    static let defaultCategoryName = "Полезные привычки"
-
     static let testTrackers: [TrackerModel] = [
         TrackerModel(
             id: UUID(),

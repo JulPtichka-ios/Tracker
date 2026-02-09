@@ -7,38 +7,144 @@
 
 import UIKit
 
-class OnboardingViewController: UIViewController {
-    private let pageControl = UIPageControl()
-    private let nextButton = UIButton(type: .system)
-    private var currentPage = 0
+// MARK: - Model
 
-    private let pages: [(image: String, title: String)] = [
-        ("onboardingBlue", "Отслеживайте только то, что хотите"),
-        ("onboardingRed", "Даже если это не литры воды и йога")
-    ]
+private struct OnboardingPage {
+    let imageName: String
+    let title: String
+}
+
+// MARK: - Content VC (один экран)
+
+private final class OnboardingContentViewController: UIViewController {
+
+    private let imageView = UIImageView()
+    private let titleLabel = UILabel()
+
+    private let page: OnboardingPage
+
+    init(page: OnboardingPage) {
+        self.page = page
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        showPage(currentPage)
     }
 
     private func setupUI() {
         view.backgroundColor = .ypWhite
 
-        pageControl.numberOfPages = pages.count
-        pageControl.currentPageIndicatorTintColor = UIColor(resource: .ypBlack)
-        pageControl.pageIndicatorTintColor = UIColor(resource: .ypGray)
+        imageView.image = UIImage(named: page.imageName)
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+
+        titleLabel.text = page.title
+        titleLabel.font = .systemFont(ofSize: 32, weight: .bold)
+        titleLabel.textColor = .ypBlack
+        titleLabel.textAlignment = .center
+        titleLabel.numberOfLines = 0
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(imageView)
+        view.addSubview(titleLabel)
+
+        NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: view.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 70),
+            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
+            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32)
+        ])
+    }
+}
+
+// MARK: - PageViewController
+
+final class OnboardingViewController: UIPageViewController {
+
+    // MARK: Data
+
+    private let pages: [OnboardingPage] = [
+        OnboardingPage(
+            imageName: "onboardingBlue",
+            title: "Отслеживайте только то, что хотите"
+        ),
+        OnboardingPage(
+            imageName: "onboardingRed",
+            title: "Даже если это не литры воды и йога"
+        )
+    ]
+
+    private lazy var controllers: [UIViewController] = {
+        pages.map { OnboardingContentViewController(page: $0) }
+    }()
+
+    private var currentIndex = 0
+
+    // MARK: UI
+
+    private let pageControl = UIPageControl()
+    private let nextButton = UIButton(type: .system)
+
+    // MARK: Lifecycle
+
+    init() {
+        super.init(
+            transitionStyle: .scroll,
+            navigationOrientation: .horizontal
+        )
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        dataSource = self
+        delegate = self
+
+        setViewControllers(
+            [controllers[0]],
+            direction: .forward,
+            animated: true
+        )
+
+        setupUI()
+    }
+
+    // MARK: UI Setup
+
+    private func setupUI() {
+        view.backgroundColor = .ypWhite
+
+        pageControl.numberOfPages = controllers.count
+        pageControl.currentPage = 0
+        pageControl.currentPageIndicatorTintColor = .ypBlack
+        pageControl.pageIndicatorTintColor = .ypGray
         pageControl.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(pageControl)
 
         nextButton.setTitle("Вот это технологии!", for: .normal)
-        nextButton.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .regular)
+        nextButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .regular)
         nextButton.setTitleColor(.ypWhite, for: .normal)
         nextButton.backgroundColor = .ypBlack
         nextButton.layer.cornerRadius = 16
         nextButton.translatesAutoresizingMaskIntoConstraints = false
-        nextButton.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
+        nextButton.addTarget(self, action: #selector(nextTapped), for: .touchUpInside)
+
+        view.addSubview(pageControl)
         view.addSubview(nextButton)
 
         NSLayoutConstraint.activate([
@@ -50,93 +156,71 @@ class OnboardingViewController: UIViewController {
             nextButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50),
             nextButton.heightAnchor.constraint(equalToConstant: 60)
         ])
-
-        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
-        swipeLeft.direction = .left
-        view.addGestureRecognizer(swipeLeft)
-
-        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
-        swipeRight.direction = .right
-        view.addGestureRecognizer(swipeRight)
     }
 
-    private func showPage(_ index: Int) {
-        view.subviews.forEach { subview in
-            if subview is UIImageView || subview is UILabel {
-                subview.removeFromSuperview()
-            }
-        }
+    // MARK: Actions
 
-        let page = pages[index]
+    @objc private func nextTapped() {
+        if currentIndex < controllers.count - 1 {
+            currentIndex += 1
 
-        let imageView = UIImageView(image: UIImage(named: page.image))
-        imageView.contentMode = .scaleAspectFill
-        imageView.clipsToBounds = true
-        imageView.translatesAutoresizingMaskIntoConstraints = false
+            setViewControllers(
+                [controllers[currentIndex]],
+                direction: .forward,
+                animated: true
+            )
 
-        if let pageControlIndex = view.subviews.firstIndex(of: pageControl) {
-            view.insertSubview(imageView, belowSubview: pageControl)
-        } else {
-            view.insertSubview(imageView, at: 0)
-        }
-
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: view.topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-
-        let titleLabel = UILabel()
-        titleLabel.text = page.title
-        titleLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
-        titleLabel.textColor = .ypBlack
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 0
-        titleLabel.lineBreakMode = .byWordWrapping
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.insertSubview(titleLabel, belowSubview: pageControl)
-
-        NSLayoutConstraint.activate([
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 70),
-            titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 32),
-            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -32)
-        ])
-
-        currentPage = index
-
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut, animations: {
-            self.pageControl.currentPage = index
-        })
-    }
-
-    @objc private func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
-        switch gesture.direction {
-        case .left where currentPage < pages.count - 1:
-            currentPage += 1
-            showPage(currentPage)
-        case .right where currentPage > 0:
-            currentPage -= 1
-            showPage(currentPage)
-        default:
-            return
-        }
-    }
-
-    @objc private func nextButtonTapped() {
-        if currentPage < pages.count - 1 {
-            currentPage += 1
-            showPage(currentPage)
+            pageControl.currentPage = currentIndex
         } else {
             UserDefaultsService.shared.hasSeenOnboarding = true
 
             guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                   let window = windowScene.windows.first else { return }
 
-            let tabBarController = MainTabBarController()
-            window.rootViewController = tabBarController
+            window.rootViewController = MainTabBarController()
             window.makeKeyAndVisible()
         }
+    }
+}
+
+// MARK: - PageViewController DataSource
+
+extension OnboardingViewController: UIPageViewControllerDataSource {
+
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerBefore viewController: UIViewController
+    ) -> UIViewController? {
+        guard let index = controllers.firstIndex(of: viewController),
+              index > 0 else { return nil }
+        return controllers[index - 1]
+    }
+
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerAfter viewController: UIViewController
+    ) -> UIViewController? {
+        guard let index = controllers.firstIndex(of: viewController),
+              index < controllers.count - 1 else { return nil }
+        return controllers[index + 1]
+    }
+}
+
+// MARK: - PageViewController Delegate
+
+extension OnboardingViewController: UIPageViewControllerDelegate {
+
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        didFinishAnimating finished: Bool,
+        previousViewControllers: [UIViewController],
+        transitionCompleted completed: Bool
+    ) {
+        guard completed,
+              let currentVC = viewControllers?.first,
+              let index = controllers.firstIndex(of: currentVC) else { return }
+
+        currentIndex = index
+        pageControl.currentPage = index
     }
 }
