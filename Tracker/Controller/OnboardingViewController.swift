@@ -137,7 +137,7 @@ final class OnboardingViewController: UIPageViewController {
         pageControl.translatesAutoresizingMaskIntoConstraints = false
 
         nextButton.setTitle("Вот это технологии!", for: .normal)
-        nextButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .regular)
+        nextButton.titleLabel?.font = AppTextStyles.medium16
         nextButton.setTitleColor(.ypWhite, for: .normal)
         nextButton.backgroundColor = .ypBlack
         nextButton.layer.cornerRadius = 16

@@ -8,19 +8,17 @@
 import Foundation
 
 // MARK: - CategoryViewModel
+
 final class CategoryViewModel {
     // MARK: - Bindings (замыкания для биндингов)
 
     var categoriesDidChange: (([String]) -> Void)?
-
     var selectedCategoryDidChange: ((String?) -> Void)?
-
     var errorDidOccur: ((String) -> Void)?
 
     // MARK: - Properties
 
     private let categoryStore: TrackerCategoryStore
-
     private(set) var categories: [String] = [] {
         didSet {
             categoriesDidChange?(categories)
@@ -34,7 +32,6 @@ final class CategoryViewModel {
     }
 
     // MARK: - Initialization
-
     init(categoryStore: TrackerCategoryStore = TrackerCategoryStore(), selectedCategory: String? = nil) {
         self.categoryStore = categoryStore
         self.selectedCategory = selectedCategory
@@ -43,7 +40,6 @@ final class CategoryViewModel {
     }
 
     // MARK: - Public Methods
-
     func loadCategories() {
         let categoryModels = categoryStore.categories
         categories = categoryModels.map { $0.title }
@@ -66,7 +62,6 @@ final class CategoryViewModel {
             errorDidOccur?("Категория не найдена")
             return
         }
-
         do {
             try categoryStore.updateCategory(categoryId, with: newName)
         } catch {
@@ -79,7 +74,6 @@ final class CategoryViewModel {
             errorDidOccur?("Категория не найдена")
             return
         }
-
         do {
             try categoryStore.deleteCategory(with: categoryId)
 

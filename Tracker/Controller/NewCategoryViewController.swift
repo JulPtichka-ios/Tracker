@@ -13,7 +13,7 @@ final class NewCategoryViewController: UIViewController {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Новая категория"
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.font = AppTextStyles.medium16
         label.textColor = UIColor(resource: .ypBlack)
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -26,7 +26,7 @@ final class NewCategoryViewController: UIViewController {
         textField.backgroundColor = UIColor(resource: .ypBackground)
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
-        textField.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        textField.font = AppTextStyles.regular17
         textField.textColor = UIColor(resource: .ypBlack)
         textField.clearButtonMode = .whileEditing
         textField.returnKeyType = .done
@@ -45,7 +45,7 @@ final class NewCategoryViewController: UIViewController {
     private let doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = AppTextStyles.medium16
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = UIColor(resource: .ypGray)
         button.layer.cornerRadius = 16
@@ -84,6 +84,7 @@ final class NewCategoryViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.setHidesBackButton(true, animated: false)
         setupUI()
         setupNavigationBar()
         setupActions()

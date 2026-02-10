@@ -40,6 +40,7 @@ final class CategoryListViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.setHidesBackButton(true, animated: false)
         setupUI()
         setupBindings()
         viewModel.loadCategories()
