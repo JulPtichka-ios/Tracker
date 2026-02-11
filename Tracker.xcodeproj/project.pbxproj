@@ -33,29 +33,17 @@
 		9F2954B72F1789A300245F03 /* Exceptions for "Tracker" folder in "Tracker" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				CoreData/Tracker.xcdatamodeld,
 				Info.plist,
 			);
 			target = 9F29548B2F1789A200245F03 /* Tracker */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		9F39D8B12F30833800BDBDE3 /* Exceptions for "Tracker" folder in "Compile Sources" phase from "Tracker" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 9F2954882F1789A200245F03 /* Sources */;
-			membershipExceptions = (
-				CoreData/Tracker.xcdatamodeld,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9F29548E2F1789A200245F03 /* Tracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				9F2954B72F1789A300245F03 /* Exceptions for "Tracker" folder in "Tracker" target */,
-				9F39D8B12F30833800BDBDE3 /* Exceptions for "Tracker" folder in "Compile Sources" phase from "Tracker" target */,
 			);
 			path = Tracker;
 			sourceTree = "<group>";

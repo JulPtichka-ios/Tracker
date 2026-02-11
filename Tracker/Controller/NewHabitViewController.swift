@@ -64,6 +64,11 @@ final class NewHabitViewController: UIViewController {
 
     var onSave: ((TrackerModel) -> Void)?
 
+    // MARK: - Public Properties
+    var currentSelectedCategory: String? {
+        return selectedCategory
+    }
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -119,7 +124,6 @@ final class NewHabitViewController: UIViewController {
     }
 
     private func setDefaultSelections() {
-        selectedCategory = "Полезные привычки"
         updateCategoryButtonTitle()
         updateCreateButtonState()
         updateScheduleButtonTitle()
@@ -433,8 +437,11 @@ extension NewHabitViewController {
 
 extension NewHabitViewController {
     @objc private func didTapCategory() {
-        updateCategoryButtonTitle()
-        print("TODO: экран категорий")
+        let categoryViewModel = CategoryViewModel(selectedCategory: selectedCategory)
+        let categoryListVC = CategoryListViewController(viewModel: categoryViewModel)
+        categoryListVC.delegate = self
+
+        navigationController?.pushViewController(categoryListVC, animated: true)
     }
 
     @objc private func didTapSchedule() {
@@ -453,6 +460,7 @@ extension NewHabitViewController {
     private func createTracker() {
         guard let title = titleSectionView.getTitle(),
               !selectedSchedule.isEmpty,
+              let selectedCategory = selectedCategory,
               let emoji = emojiSectionView.getSelectedEmoji(),
               let color = colorSectionView.getSelectedColor() else { return }
 
@@ -516,5 +524,14 @@ extension NewHabitViewController: ActionButtonsViewDelegate {
 
     func didTapCreateButton() {
         createTracker()
+    }
+}
+
+// MARK: - CategoryListViewControllerDelegate
+extension NewHabitViewController: CategoryListViewControllerDelegate {
+    func categoryListViewController(_ viewController: CategoryListViewController, didSelectCategory category: String?) {
+        selectedCategory = category
+        updateCategoryButtonTitle()
+        updateCreateButtonState()
     }
 }
