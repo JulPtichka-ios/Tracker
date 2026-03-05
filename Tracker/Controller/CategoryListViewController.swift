@@ -53,7 +53,7 @@ final class CategoryListViewController: UIViewController {
 
     // MARK: - Setup Methods
     private func setupNavigationBar() {
-        title = "Категория"
+        title = LocalizableKeys.categoryTitle
         navigationController?.navigationBar.prefersLargeTitles = false
 
         let appearance = UINavigationBarAppearance()
@@ -101,9 +101,9 @@ final class CategoryListViewController: UIViewController {
     }
 
     private func setupAddButton() {
-        addButton.setTitle("Добавить категорию", for: .normal)
+        addButton.setTitle(LocalizableKeys.categoryAdd, for: .normal)
         addButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        addButton.setTitleColor(.white, for: .normal)
+        addButton.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
         addButton.backgroundColor = UIColor(resource: .ypBlack)
         addButton.layer.cornerRadius = 16
         addButton.layer.masksToBounds = true
@@ -125,7 +125,7 @@ final class CategoryListViewController: UIViewController {
     private func setupPlaceholderView() {
         placeholderView.configure(
             image: UIImage(named: "errorStar"),
-            title: "Привычки и события можно\nобъединить по смыслу",
+            title: LocalizableKeys.categoryEmptyPlaceholder,
             subtitle: nil
         )
         placeholderView.isHidden = true
@@ -176,11 +176,11 @@ final class CategoryListViewController: UIViewController {
 
     private func showErrorAlert(message: String) {
         let alert = UIAlertController(
-            title: "Ошибка",
+            title: LocalizableKeys.error,
             message: message,
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: LocalizableKeys.ok, style: .default))
         present(alert, animated: true)
     }
 
@@ -209,16 +209,16 @@ final class CategoryListViewController: UIViewController {
 
     private func showDeleteConfirmation(for category: String, at indexPath: IndexPath) {
         let alert = UIAlertController(
-            title: "Эта категория точно не нужна?",
+            title: LocalizableKeys.categoryDeleteConfirm,
             message: nil,
             preferredStyle: .actionSheet
         )
-
-        alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+        
+        alert.addAction(UIAlertAction(title: LocalizableKeys.delete, style: .destructive) { [weak self] _ in
             self?.viewModel.deleteCategory(category)
         })
-
-        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel))
+        
+        alert.addAction(UIAlertAction(title: LocalizableKeys.cancel, style: .cancel))
 
         if let popoverController = alert.popoverPresentationController {
             popoverController.sourceView = tableView
@@ -304,15 +304,13 @@ extension CategoryListViewController: UITableViewDelegate {
 
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
             let editAction = UIAction(
-                title: "Редактировать",
-                image: UIImage(systemName: "pencil")
+                title: LocalizableKeys.edit,
             ) { [weak self] _ in
                 self?.showNewCategoryScreen(isEditing: true, category: category)
             }
 
             let deleteAction = UIAction(
-                title: "Удалить",
-                image: UIImage(systemName: "trash"),
+                title: LocalizableKeys.delete,
                 attributes: .destructive
             ) { [weak self] _ in
                 self?.showDeleteConfirmation(for: category, at: indexPath)

@@ -1,0 +1,93 @@
+
+
+// MARK: - Common
+"common.cancel" = "Отмена";
+"common.done" = "Готово";
+"common.save" = "Сохранить";
+"common.delete" = "Удалить";
+"common.edit" = "Редактировать";
+"common.add" = "Добавить";
+"common.ok" = "OK";
+"common.error" = "Ошибка";
+"common.error.limit" = "Ограничение 38 символов";
+
+// MARK: - Tab Bar
+"tab.trackers" = "Трекеры";
+"tab.statistics" = "Статистика";
+
+// MARK: - Trackers Screen
+"trackers.title" = "Трекеры";
+"trackers.search.placeholder" = "Поиск";
+"trackers.empty.placeholder" = "Что будем отслеживать?";
+"trackers.add.tracker" = "Добавить трекер";
+"trackers.pin" = "Закрепить";
+"trackers.unpin" = "Открепить";
+
+// MARK: - Statistics Screen
+"statistics.title" = "Статистика";
+"statistics.empty.placeholder" = "Анализироать пока нечего";
+"statistics.completed" = "Завершено";
+"statistics.best.period" = "Лучший период";
+
+// MARK: - New Habit Screen
+"newhabit.title" = "Новая привычка";
+"newhabit.category" = "Категория";
+"newhabit.schedule" = "Расписание";
+"newhabit.enter.name" = "Введите название трекера";
+"newhabit.emoji" = "Emoji";
+"newhabit.color" = "Цвет";
+"newhabit.create" = "Создать";
+
+// MARK: - Category Screen
+"category.title" = "Категория";
+"category.add" = "Добавить категорию";
+"category.new" = "Новая категория";
+"category.edit" = "Редактирование категории";
+"category.enter.name" = "Введите название категории";
+"category.empty.placeholder" = "Привычки и события можно\nобъединить по смыслу";
+"category.delete.confirm" = "Эта категория точно не нужна?";
+
+// MARK: - Schedule Screen
+"schedule.title" = "Расписание";
+"schedule.everyday" = "Каждый день";
+
+// MARK: - Onboarding
+"onboarding.page1.title" = "Отслеживайте только то, что хотите";
+"onboarding.page2.title" = "Даже если это не литры воды и йога";
+"onboarding.button" = "Вот это технологии!";
+
+// MARK: - Days pluralization
+"days.count" = "%d дней";
+
+// MARK: - Week Days
+"weekday.monday" = "Понедельник";
+"weekday.tuesday" = "Вторник";
+"weekday.wednesday" = "Среда";
+"weekday.thursday" = "Четверг";
+"weekday.friday" = "Пятница";
+"weekday.saturday" = "Суббота";
+"weekday.sunday" = "Воскресенье";
+
+"weekday.monday.short" = "Пн";
+"weekday.tuesday.short" = "Вт";
+"weekday.wednesday.short" = "Ср";
+"weekday.thursday.short" = "Чт";
+"weekday.friday.short" = "Пт";
+"weekday.saturday.short" = "Сб";
+"weekday.sunday.short" = "Вс";
+
+// MARK: - Context Menu
+"context.edit" = "Редактировать";
+"context.delete" = "Удалить";
+"context.delete.title" = "Удаление трекера";
+"context.delete.message" = "Вы уверены, что хотите удалить трекер \"%@\"?";
+"context.delete.error" = "Не удалось удалить трекер";
+
+// MARK: - Filter
+"filter.button" = "Фильтры";
+"filter.title" = "Фильтры";
+"filter.all" = "Все трекеры";
+"filter.today" = "Трекеры на сегодня";
+"filter.completed" = "Завершённые";
+"filter.uncompleted" = "Незавершённые";
+"filter.empty" = "Ничего не найдено";

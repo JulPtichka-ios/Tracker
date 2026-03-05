@@ -16,7 +16,7 @@ final class EmojiSectionView: UIView {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Emoji"
+        label.text = LocalizableKeys.newHabitEmoji
         label.font = AppTextStyles.bold19
         label.textColor = UIColor(resource: .ypBlack)
         return label

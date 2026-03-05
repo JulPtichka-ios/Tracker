@@ -34,12 +34,13 @@ final class TitleSectionView: UIView {
     }
     
     private func setupTitleTextField() {
-        titleTextField.placeholder = "Введите название трекера"
+        titleTextField.placeholder = LocalizableKeys.newHabitEnterName
         titleTextField.font = AppTextStyles.regular17
         titleTextField.borderStyle = .none
         titleTextField.layer.cornerRadius = 18
         titleTextField.clipsToBounds = true
         titleTextField.backgroundColor = UIColor(resource: .ypBackground)
+        titleTextField.textColor = UIColor(resource: .ypBlack)
         
         let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 20))
         titleTextField.leftView = leftPaddingView
@@ -66,9 +67,9 @@ final class TitleSectionView: UIView {
     }
     
     private func setupErrorLabel() {
-        errorLabel.text = "Ограничение 38 символов"
+        errorLabel.text = LocalizableKeys.limit
         errorLabel.font = AppTextStyles.regular17
-        errorLabel.textColor = .ypRed
+        errorLabel.textColor = UIColor(resource: .ypRed)
         errorLabel.textAlignment = .center
         errorLabel.isHidden = true
         
@@ -96,6 +97,13 @@ final class TitleSectionView: UIView {
     func getTitle() -> String? {
         let text = titleTextField.text ?? ""
         return text.isEmpty ? nil : text
+    }
+    
+    func setText(_ text: String) {
+        titleTextField.text = text
+        titleTextField.rightView?.isHidden = text.isEmpty
+        delegate?.titleDidChange(text)
+        showError(text.count >= UIConstants.maxTitleLength)
     }
     
     func showError(_ show: Bool) {

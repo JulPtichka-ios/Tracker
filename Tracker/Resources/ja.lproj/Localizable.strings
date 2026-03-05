@@ -1,0 +1,91 @@
+// MARK: - Common
+"common.cancel" = "キャンセル";
+"common.done" = "完了";
+"common.save" = "保存";
+"common.delete" = "削除";
+"common.edit" = "編集";
+"common.add" = "追加";
+"common.ok" = "OK";
+"common.error" = "エラー";
+"common.error.limit" = "文字数制限は38文字です";
+
+// MARK: - Tab Bar
+"tab.trackers" = "トラッカー";
+"tab.statistics" = "統計";
+
+// MARK: - Trackers Screen
+"trackers.title" = "トラッカー";
+"trackers.search.placeholder" = "検索";
+"trackers.empty.placeholder" = "何を追跡しますか？";
+"trackers.add.tracker" = "トラッカーを追加";
+"trackers.pin" = "ピン留め";
+"trackers.unpin" = "ピン留め解除";
+
+// MARK: - Statistics Screen
+"statistics.title" = "統計";
+"statistics.empty.placeholder" = "まだ分析するものは何もありません";
+"statistics.completed" = "完了したトラッカー";
+"statistics.best.period" = "最高記録";
+
+// MARK: - New Habit Screen
+"newhabit.title" = "新しい習慣";
+"newhabit.category" = "カテゴリー";
+"newhabit.schedule" = "スケジュール";
+"newhabit.enter.name" = "トラッカー名を入力";
+"newhabit.emoji" = "絵文字";
+"newhabit.color" = "色";
+"newhabit.create" = "作成";
+
+// MARK: - Category Screen
+"category.title" = "カテゴリー";
+"category.add" = "カテゴリーを追加";
+"category.new" = "新しいカテゴリー";
+"category.edit" = "カテゴリーを編集";
+"category.enter.name" = "カテゴリー名を入力";
+"category.empty.placeholder" = "習慣やイベントは意味ごとに\nグループ化できます";
+"category.delete.confirm" = "このカテゴリーは本当に必要ありませんか？";
+
+// MARK: - Schedule Screen
+"schedule.title" = "スケジュール";
+"schedule.everyday" = "毎日";
+
+// MARK: - Onboarding
+"onboarding.page1.title" = "自分が追跡したいものだけを記録";
+"onboarding.page2.title" = "水の量やヨガでなくても大丈夫";
+"onboarding.button" = "始めましょう！";
+
+// MARK: - Days pluralization
+"days.count" = "%d日";
+
+// MARK: - Week Days
+"weekday.monday" = "月曜日";
+"weekday.tuesday" = "火曜日";
+"weekday.wednesday" = "水曜日";
+"weekday.thursday" = "木曜日";
+"weekday.friday" = "金曜日";
+"weekday.saturday" = "土曜日";
+"weekday.sunday" = "日曜日";
+
+"weekday.monday.short" = "月";
+"weekday.tuesday.short" = "火";
+"weekday.wednesday.short" = "水";
+"weekday.thursday.short" = "木";
+"weekday.friday.short" = "金";
+"weekday.saturday.short" = "土";
+"weekday.sunday.short" = "日";
+
+// MARK: - Context Menu
+"context.edit" = "編集";
+"context.delete" = "削除";
+"context.delete.title" = "トラッカーを削除";
+"context.delete.message" = "トラッカー \"%@\" を削除してもよろしいですか？";
+"context.delete.error" = "トラッカーの削除に失敗しました";
+
+// MARK: - Filter
+"filter.button" = "フィルター";
+"filter.title" = "フィルター";
+"filter.all" = "すべてのトラッカー";
+"filter.today" = "今日のトラッカー";
+"filter.completed" = "完了したもの";
+"filter.uncompleted" = "未完了のもの";
+"filter.empty" = "見つかりませんでした";

@@ -12,7 +12,7 @@ final class NewCategoryViewController: UIViewController {
     // MARK: - Properties
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Новая категория"
+        label.text = LocalizableKeys.categoryNew
         label.font = AppTextStyles.medium16
         label.textColor = UIColor(resource: .ypBlack)
         label.textAlignment = .center
@@ -22,7 +22,7 @@ final class NewCategoryViewController: UIViewController {
     
     private let textField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = LocalizableKeys.categoryEnterName
         textField.backgroundColor = UIColor(resource: .ypBackground)
         textField.layer.cornerRadius = 16
         textField.layer.masksToBounds = true
@@ -31,7 +31,6 @@ final class NewCategoryViewController: UIViewController {
         textField.clearButtonMode = .whileEditing
         textField.returnKeyType = .done
         
-        // Добавляем отступы для текста
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
         textField.leftView = paddingView
         textField.leftViewMode = .always
@@ -44,9 +43,9 @@ final class NewCategoryViewController: UIViewController {
     
     private let doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(LocalizableKeys.done, for: .normal)
         button.titleLabel?.font = AppTextStyles.medium16
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
         button.backgroundColor = UIColor(resource: .ypGray)
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
@@ -98,8 +97,7 @@ final class NewCategoryViewController: UIViewController {
     
     // MARK: - Setup Methods
     private func setupNavigationBar() {
-        title = isEditingMode ? "Редактирование категории" : "Новая категория"
-        
+        title = isEditingMode ? LocalizableKeys.categoryEdit : LocalizableKeys.categoryNew
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor(resource: .ypWhite)
@@ -119,6 +117,8 @@ final class NewCategoryViewController: UIViewController {
         view.addSubview(textField)
         view.addSubview(doneButton)
         view.addSubview(placeholderLabel)
+        textField.placeholder = LocalizableKeys.categoryEnterName
+        doneButton.setTitle(LocalizableKeys.done, for: .normal)
         
         NSLayoutConstraint.activate([
             textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),

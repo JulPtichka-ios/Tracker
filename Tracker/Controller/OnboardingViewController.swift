@@ -47,7 +47,7 @@ private final class OnboardingContentViewController: UIViewController {
 
         titleLabel.text = page.title
         titleLabel.font = .systemFont(ofSize: 32, weight: .bold)
-        titleLabel.textColor = .ypBlack
+        titleLabel.textColor = .ypUltraBlack
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -78,11 +78,11 @@ final class OnboardingViewController: UIPageViewController {
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             imageName: "onboardingBlue",
-            title: "Отслеживайте только то, что хотите"
+            title: LocalizableKeys.onboardingPage1Title
         ),
         OnboardingPage(
             imageName: "onboardingRed",
-            title: "Даже если это не литры воды и йога"
+            title: LocalizableKeys.onboardingPage2Title
         )
     ]
 
@@ -132,14 +132,14 @@ final class OnboardingViewController: UIPageViewController {
 
         pageControl.numberOfPages = controllers.count
         pageControl.currentPage = 0
-        pageControl.currentPageIndicatorTintColor = .ypBlack
+        pageControl.currentPageIndicatorTintColor = .ypUltraBlack
         pageControl.pageIndicatorTintColor = .ypGray
         pageControl.translatesAutoresizingMaskIntoConstraints = false
 
-        nextButton.setTitle("Вот это технологии!", for: .normal)
+        nextButton.setTitle(LocalizableKeys.onboardingButton, for: .normal)
         nextButton.titleLabel?.font = AppTextStyles.medium16
-        nextButton.setTitleColor(.ypWhite, for: .normal)
-        nextButton.backgroundColor = .ypBlack
+        nextButton.setTitleColor(.ypUltraWhite, for: .normal)
+        nextButton.backgroundColor = .ypUltraBlack
         nextButton.layer.cornerRadius = 16
         nextButton.translatesAutoresizingMaskIntoConstraints = false
         nextButton.addTarget(self, action: #selector(nextTapped), for: .touchUpInside)
