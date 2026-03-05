@@ -6,31 +6,82 @@
 //
 
 import XCTest
+import SnapshotTesting
 @testable import Tracker
 
-final class TrackerTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+final class TrackersViewControllerSnapshotTests: XCTestCase {
+    
+    var sut: TrackersViewController!
+    
+    override func setUp() {
+        super.setUp()
+        sut = TrackersViewController()
+        sut.view.frame = CGRect(x: 0, y: 0, width: 402, height: 874)
+        sut.overrideUserInterfaceStyle = .light
     }
-
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
+    override func tearDown() {
+        sut = nil
+        super.tearDown()
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    
+        func testTrackersViewControllerWithSearch() {
+        addTestTrackers()
+        sut.loadViewIfNeeded()
+        
+        let searchController = sut.navigationItem.searchController
+        searchController?.searchBar.text = "Вода"
+        searchController?.searchResultsUpdater?.updateSearchResults(for: searchController!)
+        
+        sut.view.layoutIfNeeded()
+        
+        assertSnapshot(
+            of: sut,
+            as: .image(
+                traits: UITraitCollection(userInterfaceStyle: .light)
+            ),
+            named: "TrackersViewController_search_light"
+        )
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    
+    // MARK: - Helper Methods
+    
+    private func addTestTrackers() {
+        let categoryStore = TrackerCategoryStore()
+        
+        do {
+            let categoryId = try categoryStore.addCategory(with: "Важное")
+            
+            let trackers = [
+                TrackerModel(
+                    id: UUID(),
+                    title: "Пить воду",
+                    color: "ColorSelection1",
+                    emoji: "💧",
+                    schedule: [.monday, .wednesday, .friday]
+                ),
+                TrackerModel(
+                    id: UUID(),
+                    title: "Зарядка",
+                    color: "ColorSelection5",
+                    emoji: "🏃‍♂️",
+                    schedule: [.monday, .tuesday, .thursday]
+                ),
+                TrackerModel(
+                    id: UUID(),
+                    title: "Чтение",
+                    color: "ColorSelection8",
+                    emoji: "📚",
+                    schedule: [.wednesday, .saturday]
+                )
+            ]
+            
+            let trackerStore = TrackerStore()
+            for tracker in trackers {
+                try trackerStore.addTracker(tracker, to: categoryId)
+            }
+        } catch {
+            print("❌ Ошибка при добавлении тестовых трекеров: \(error)")
         }
     }
-
 }

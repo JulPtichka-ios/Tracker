@@ -19,19 +19,19 @@ class MainTabBarController: UITabBarController {
         print("✅ MainTabBarController: setupTabBar")
         
         let trackersVC = TrackersViewController()
-        trackersVC.title = "Трекеры"
+        trackersVC.title = LocalizableKeys.tabTrackers
         let trackersNav = UINavigationController(rootViewController: trackersVC)
         trackersNav.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: LocalizableKeys.tabTrackers,
             image: UIImage(systemName: "record.circle.fill"),
             tag: 0
         )
 
         let statisticsVC = StatisticsViewController()
-        statisticsVC.title = "Статистика"
+        statisticsVC.title = LocalizableKeys.tabStatistics
         let statisticsNav = UINavigationController(rootViewController: statisticsVC)
         statisticsNav.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: LocalizableKeys.tabStatistics,
             image: UIImage(systemName: "hare"),
             tag: 1
         )

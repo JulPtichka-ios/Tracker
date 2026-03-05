@@ -1,0 +1,94 @@
+
+
+// MARK: - Common
+"common.cancel" = "Cancel";
+"common.done" = "Done";
+"common.save" = "Save";
+"common.delete" = "Delete";
+"common.edit" = "Edit";
+"common.add" = "Add";
+"common.ok" = "OK";
+"common.error" = "Error";
+"common.error.limit" = "The limit is 38 characters";
+
+
+// MARK: - Tab Bar
+"tab.trackers" = "Trackers";
+"tab.statistics" = "Statistics";
+
+// MARK: - Trackers Screen
+"trackers.title" = "Trackers";
+"trackers.search.placeholder" = "Search";
+"trackers.empty.placeholder" = "What will we track?";
+"trackers.add.tracker" = "Add tracker";
+"trackers.pin" = "Pin";
+"trackers.unpin" = "Unpin";
+
+// MARK: - Statistics Screen
+"statistics.title" = "Statistics";
+"statistics.empty.placeholder" = "There is nothing to analyze yet";
+"statistics.completed" = "Completed";
+"statistics.best.period" = "Best period";
+
+// MARK: - New Habit Screen
+"newhabit.title" = "New habit";
+"newhabit.category" = "Category";
+"newhabit.schedule" = "Schedule";
+"newhabit.enter.name" = "Enter tracker name";
+"newhabit.emoji" = "Emoji";
+"newhabit.color" = "Color";
+"newhabit.create" = "Create";
+
+// MARK: - Category Screen
+"category.title" = "Category";
+"category.add" = "Add category";
+"category.new" = "New category";
+"category.edit" = "Edit category";
+"category.enter.name" = "Enter category name";
+"category.empty.placeholder" = "Habits and events can be\ncombined by meaning";
+"category.delete.confirm" = "Are you sure you don't need this category?";
+
+// MARK: - Schedule Screen
+"schedule.title" = "Schedule";
+"schedule.everyday" = "Every day";
+
+// MARK: - Onboarding
+"onboarding.page1.title" = "Track only what you want";
+"onboarding.page2.title" = "Even if it's not liters of water and yoga";
+"onboarding.button" = "That's the technology!";
+
+// MARK: - Days pluralization
+"days.count" = "%d days";
+
+// MARK: - Week Days
+"weekday.monday" = "Monday";
+"weekday.tuesday" = "Tuesday";
+"weekday.wednesday" = "Wednesday";
+"weekday.thursday" = "Thursday";
+"weekday.friday" = "Friday";
+"weekday.saturday" = "Saturday";
+"weekday.sunday" = "Sunday";
+
+"weekday.monday.short" = "Mon";
+"weekday.tuesday.short" = "Tue";
+"weekday.wednesday.short" = "Wed";
+"weekday.thursday.short" = "Thu";
+"weekday.friday.short" = "Fri";
+"weekday.saturday.short" = "Sat";
+"weekday.sunday.short" = "Sun";
+
+// MARK: - Context Menu
+"context.edit" = "Edit";
+"context.delete" = "Delete";
+"context.delete.title" = "Delete Tracker";
+"context.delete.message" = "Are you sure you want to delete tracker \"%@\"?";
+"context.delete.error" = "Failed to delete tracker";
+
+// MARK: - Filter
+"filter.button" = "Filters";
+"filter.title" = "Filters";
+"filter.all" = "All trackers";
+"filter.today" = "Trackers for today";
+"filter.completed" = "Completed";
+"filter.uncompleted" = "Uncompleted";
+"filter.empty" = "Nothing found";

@@ -5,7 +5,6 @@
 //  Created by Воробьева Юлия on 13.01.2026.
 //
 
-import SwiftUICore
 import UIKit
 
 final class TrackerCategoryHeader: UICollectionReusableView {
@@ -43,11 +42,14 @@ final class TrackerCategoryHeader: UICollectionReusableView {
 }
 
 class TrackersViewController: UIViewController {
+    
     // MARK: - Properties
     private let trackerStore = TrackerStore()
     private let categoryStore = TrackerCategoryStore()
     private let recordStore = TrackerRecordStore()
     private var currentDate: Date = .init()
+    private var currentFilter: FilterOption = .all
+    private let filterButton = UIButton(type: .system)
 
     private let searchManager = SearchManager()
     private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
@@ -69,7 +71,7 @@ class TrackersViewController: UIViewController {
 
         let label = UILabel()
         label.attributedText = AppTextStyles.attributed(
-            "Что будем отслеживать?",
+            LocalizableKeys.trackersEmptyPlaceholder,
             style: AppTextStyles.medium12,
             lineHeight: 12,
             color: UIColor(resource: .ypBlack)
@@ -107,7 +109,7 @@ class TrackersViewController: UIViewController {
         recordStore.delegate = self
         searchManager.delegate = self
 
-        title = "Трекеры"
+        title = LocalizableKeys.trackersTitle
         view.backgroundColor = UIColor(resource: .ypWhite)
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -116,14 +118,14 @@ class TrackersViewController: UIViewController {
             .foregroundColor: UIColor(resource: .ypBlack)
         ]
 
-        if categoryStore.categories.isEmpty {
-        }
-
         setupPlusButton()
         setupDatePicker()
         setupSearchController()
         setupCollectionView()
+        setupFilterButton()
         updateUI()
+        
+        AnalyticsService.shared.reportOpenScreen(screen: .main)
     }
 
     // MARK: - Layout
@@ -174,6 +176,27 @@ class TrackersViewController: UIViewController {
     }
 
     // MARK: - UI Setup
+    private func setupFilterButton() {
+        filterButton.setTitle(LocalizableKeys.filterButton, for: .normal)
+        filterButton.setTitleColor(UIColor(resource: .ypUltraWhite), for: .normal)
+        filterButton.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        filterButton.backgroundColor = UIColor(resource: .ypBlue)
+        filterButton.layer.cornerRadius = 16
+        filterButton.layer.borderWidth = 0
+        filterButton.layer.borderColor = UIColor(resource: .ypBlue).cgColor
+        filterButton.addTarget(self, action: #selector(didTapFilter), for: .touchUpInside)
+        filterButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(filterButton)
+        
+        NSLayoutConstraint.activate([
+            filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            filterButton.widthAnchor.constraint(equalToConstant: 114),
+            filterButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+
     private func setupPlusButton() {
         let plusButton = UIButton(type: .system)
         plusButton.setImage(UIImage(named: "plus"), for: .normal)
@@ -191,7 +214,7 @@ class TrackersViewController: UIViewController {
         let datePicker = UIDatePicker()
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
-        datePicker.locale = Locale(identifier: "ru_RU")
+        datePicker.locale = Locale.current
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
         datePicker.date = currentDate
 
@@ -209,7 +232,7 @@ class TrackersViewController: UIViewController {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.automaticallyShowsCancelButton = false
-        searchController.searchBar.placeholder = "Поиск"
+        searchController.searchBar.placeholder = LocalizableKeys.trackersSearchPlaceholder
         navigationItem.searchController = searchController
         definesPresentationContext = true
     }
@@ -227,9 +250,15 @@ class TrackersViewController: UIViewController {
 
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.contentInsetAdjustmentBehavior = .scrollableAxes
+        
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
+        collectionView.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 80, right: 0)
+        collectionView.alwaysBounceVertical = true
 
         view.addSubview(collectionView)
         view.addSubview(placeholderView)
+        
+        view.bringSubviewToFront(placeholderView)
 
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -251,8 +280,9 @@ class TrackersViewController: UIViewController {
     }
 
     @objc private func didTapAdd() {
+        AnalyticsService.shared.reportClick(screen: .main, item: .addTrack)
         let newHabitVC = NewHabitViewController()
-        
+
         newHabitVC.onSave = { [weak self] tracker in
             guard let categoryName = newHabitVC.currentSelectedCategory else {
                 print("❌ Категория не выбрана")
@@ -265,11 +295,30 @@ class TrackersViewController: UIViewController {
         navController.modalPresentationStyle = .pageSheet
         present(navController, animated: true)
     }
+    
+    @objc private func didTapFilter() {
+        AnalyticsService.shared.reportClick(screen: .main, item: .filter)
+
+        let filterVC = FilterViewController(selectedFilter: currentFilter)
+        filterVC.delegate = self
+        
+        let navController = UINavigationController(rootViewController: filterVC)
+        navController.modalPresentationStyle = .pageSheet
+        
+        if let sheet = navController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(navController, animated: true)
+    }
 
     // MARK: - Helpers
     private func updateUI() {
-        let categories = trackerStore.fetchTrackers(for: currentDate)
-
+        var categories = trackerStore.fetchTrackers(for: currentDate)
+        
+        categories = applyFilter(to: categories)
+        
         searchManager.updateCategories(categories)
 
         let currentCategories = searchManager.getCurrentCategories()
@@ -277,8 +326,70 @@ class TrackersViewController: UIViewController {
 
         collectionView.isHidden = !hasVisibleCategories
         placeholderView.isHidden = hasVisibleCategories
+        
+        filterButton.isHidden = !hasVisibleCategories && currentFilter == .all
+        
+        updateFilterButtonAppearance()
+        
+        if !hasVisibleCategories && searchManager.isCurrentlySearching() == false {
+            showEmptyStateForFilter()
+        }
 
         collectionView.reloadData()
+    }
+
+    private func applyFilter(to categories: [TrackerCategoryModel]) -> [TrackerCategoryModel] {
+        switch currentFilter {
+        case .all:
+            return categories
+        case .today:
+            return categories
+        case .completed:
+            return filterCompletedTrackers(categories)
+        case .uncompleted:
+            return filterUncompletedTrackers(categories)
+        }
+    }
+
+    private func filterCompletedTrackers(_ categories: [TrackerCategoryModel]) -> [TrackerCategoryModel] {
+        return categories.compactMap { category in
+            let completedTrackers = category.trackers.filter { tracker in
+                recordStore.isCompletedToday(trackerId: tracker.id, date: currentDate)
+            }
+            return completedTrackers.isEmpty ? nil : TrackerCategoryModel(title: category.title, trackers: completedTrackers)
+        }
+    }
+
+    private func filterUncompletedTrackers(_ categories: [TrackerCategoryModel]) -> [TrackerCategoryModel] {
+        return categories.compactMap { category in
+            let uncompletedTrackers = category.trackers.filter { tracker in
+                !recordStore.isCompletedToday(trackerId: tracker.id, date: currentDate)
+            }
+            return uncompletedTrackers.isEmpty ? nil : TrackerCategoryModel(title: category.title, trackers: uncompletedTrackers)
+        }
+    }
+
+    private func updateFilterButtonAppearance() {
+        if currentFilter == .all || currentFilter == .today {
+            filterButton.setTitleColor(UIColor(resource: .ypUltraWhite), for: .normal)
+            filterButton.backgroundColor = UIColor(resource: .ypBlue)
+            filterButton.layer.borderColor = UIColor(resource: .ypBlue).cgColor
+        } else {
+            filterButton.setTitleColor(.white, for: .normal)
+            filterButton.backgroundColor = UIColor(resource: .ypRed)
+            filterButton.layer.borderColor = UIColor(resource: .ypRed).cgColor
+        }
+    }
+
+    private func showEmptyStateForFilter() {
+        if let placeholderView = placeholderView as? PlaceholderView {
+            placeholderView.configure(
+                image: UIImage(named: "errorStar"),
+                title: LocalizableKeys.filterEmpty,
+                subtitle: nil
+            )
+        }
+        placeholderView.isHidden = false
     }
 
     // MARK: - Data Methods
@@ -316,6 +427,23 @@ class TrackersViewController: UIViewController {
         let today = calendar.startOfDay(for: Date())
         let selectedDay = calendar.startOfDay(for: date)
         return selectedDay > today
+    }
+}
+
+// MARK: - FilterViewControllerDelegate
+extension TrackersViewController: FilterViewControllerDelegate {
+    func didSelectFilter(_ filter: FilterOption) {
+        currentFilter = filter
+        
+        if filter == .today {
+            currentDate = Date()
+            
+            if let datePicker = navigationItem.rightBarButtonItem?.customView as? UIDatePicker {
+                datePicker.date = currentDate
+            }
+        }
+        
+        updateUI()
     }
 }
 
@@ -427,6 +555,8 @@ extension TrackersViewController: UICollectionViewDataSource {
         if !isFuture {
             cell.completionHandler = { [weak self] isCompletedNew in
                 guard let self = self else { return }
+                
+                AnalyticsService.shared.reportClick(screen: .main, item: .track)
 
                 if isCompletedNew {
                     self.completeTracker(tracker.id, date: self.currentDate)
@@ -476,5 +606,151 @@ extension TrackersViewController: UICollectionViewDataSource {
 extension TrackersViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
         return false
+    }
+
+    // MARK: - Context Menu
+    func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemsAt indexPaths: [IndexPath],
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard let indexPath = indexPaths.first else { return nil }
+
+        let categories = searchManager.getCurrentCategories()
+        guard indexPath.section < categories.count,
+              indexPath.item < categories[indexPath.section].trackers.count else { return nil }
+
+        let tracker = categories[indexPath.section].trackers[indexPath.item]
+
+        return UIContextMenuConfiguration(identifier: indexPath as NSCopying, previewProvider: nil) { _ in
+
+            let editAction = UIAction(
+                title: LocalizableKeys.contextEdit,
+            ) { [weak self] _ in
+                
+                AnalyticsService.shared.reportClick(screen: .main, item: .edit)
+                
+                self?.editTracker(tracker)
+            }
+
+            let deleteAction = UIAction(
+                title: LocalizableKeys.contextDelete,
+                attributes: .destructive
+            ) { [weak self] _ in
+                
+                AnalyticsService.shared.reportClick(screen: .main, item: .delete)
+
+                self?.showDeleteConfirmation(for: tracker)
+            }
+
+            return UIMenu(title: "", children: [editAction, deleteAction])
+        }
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        guard let indexPath = configuration.identifier as? IndexPath,
+              let cell = collectionView.cellForItem(at: indexPath) as? TrackerCell else { return nil }
+
+        return UITargetedPreview(view: cell)
+    }
+}
+
+// MARK: - Context Menu Actions
+extension TrackersViewController {
+    func editTracker(_ tracker: TrackerModel) {
+        print("✏️ Редактирование трекера: \(tracker.title)")
+
+        let editHabitVC = NewHabitViewController()
+        editHabitVC.editingTracker = tracker
+
+        editHabitVC.onSave = { [weak self] updatedTracker in
+            self?.updateTracker(updatedTracker, oldTracker: tracker)
+        }
+
+        let navController = UINavigationController(rootViewController: editHabitVC)
+        present(navController, animated: true)
+    }
+
+    func showDeleteConfirmation(for tracker: TrackerModel) {
+        let message = String(format: LocalizableKeys.contextDeleteMessage, tracker.title)
+
+        let alert = UIAlertController(
+            title: LocalizableKeys.contextDeleteTitle,
+            message: message,
+            preferredStyle: .actionSheet
+        )
+
+        let deleteAction = UIAlertAction(
+            title: LocalizableKeys.contextDelete,
+            style: .destructive
+        ) { [weak self] _ in
+            self?.deleteTracker(tracker)
+        }
+
+        let cancelAction = UIAlertAction(
+            title: LocalizableKeys.cancel,
+            style: .cancel
+        )
+
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+
+        if let popoverController = alert.popoverPresentationController {
+            popoverController.sourceView = view
+            popoverController.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
+            popoverController.permittedArrowDirections = []
+        }
+
+        present(alert, animated: true)
+    }
+
+    func deleteTracker(_ tracker: TrackerModel) {
+        do {
+            try trackerStore.deleteTracker(with: tracker.id)
+            print("🗑️ Трекер удален: \(tracker.title)")
+            updateUI()
+        } catch {
+            print("❌ Ошибка при удалении трекера: \(error)")
+
+            let errorAlert = UIAlertController(
+                title: LocalizableKeys.error,
+                message: LocalizableKeys.contextDeleteError,
+                preferredStyle: .alert
+            )
+            errorAlert.addAction(UIAlertAction(title: LocalizableKeys.ok, style: .default))
+            present(errorAlert, animated: true)
+        }
+    }
+
+    func updateTracker(_ updatedTracker: TrackerModel, oldTracker: TrackerModel) {
+        let categories = categoryStore.categories
+        guard let category = categories.first(where: { $0.trackers.contains(where: { $0.id == oldTracker.id }) }) else {
+            print("❌ Категория не найдена")
+            return
+        }
+
+        guard let categoryId = categoryStore.fetchCategoryId(for: category.title) else {
+            print("❌ ID категории не найден")
+            return
+        }
+
+        do {
+            try trackerStore.updateTracker(updatedTracker, categoryId: categoryId)
+            print("✅ Трекер обновлен: \(updatedTracker.title)")
+            updateUI()
+        } catch {
+            print("❌ Ошибка при обновлении трекера: \(error)")
+
+            let errorAlert = UIAlertController(
+                title: LocalizableKeys.error,
+                message: "Не удалось обновить трекер",
+                preferredStyle: .alert
+            )
+            errorAlert.addAction(UIAlertAction(title: LocalizableKeys.ok, style: .default))
+            present(errorAlert, animated: true)
+        }
     }
 }

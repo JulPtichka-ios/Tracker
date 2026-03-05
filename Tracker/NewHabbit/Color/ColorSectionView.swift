@@ -16,7 +16,7 @@ final class ColorSectionView: UIView {
 
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Цвет"
+        label.text = LocalizableKeys.newHabitColor
         label.font = AppTextStyles.bold19
         label.textColor = UIColor(resource: .ypBlack)
         return label

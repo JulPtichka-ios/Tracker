@@ -1,0 +1,91 @@
+// MARK: - Common
+"common.cancel" = "إلغاء";
+"common.done" = "تم";
+"common.save" = "حفظ";
+"common.delete" = "حذف";
+"common.edit" = "تعديل";
+"common.add" = "إضافة";
+"common.ok" = "موافق";
+"common.error" = "خطأ";
+"common.error.limit" = "الحد الأقصى 38 حرفًا";
+
+// MARK: - Tab Bar
+"tab.trackers" = "المتتبعات";
+"tab.statistics" = "الإحصائيات";
+
+// MARK: - Trackers Screen
+"trackers.title" = "المتتبعات";
+"trackers.search.placeholder" = "بحث";
+"trackers.empty.placeholder" = "ماذا سنتتبع؟";
+"trackers.add.tracker" = "إضافة متتبع";
+"trackers.pin" = "تثبيت";
+"trackers.unpin" = "إلغاء التثبيت";
+
+// MARK: - Statistics Screen
+"statistics.title" = "الإحصائيات";
+"statistics.empty.placeholder" = "لا يوجد شيء لتحليل حتى الآن;";
+"statistics.completed" = "المكتمل";
+"statistics.best.period" = "أفضل فترة";
+
+// MARK: - New Habit Screen
+"newhabit.title" = "عادة جديدة";
+"newhabit.category" = "الفئة";
+"newhabit.schedule" = "الجدول";
+"newhabit.enter.name" = "أدخل اسم المتتبع";
+"newhabit.emoji" = "رمز تعبيري";
+"newhabit.color" = "اللون";
+"newhabit.create" = "إنشاء";
+
+// MARK: - Category Screen
+"category.title" = "الفئة";
+"category.add" = "إضافة فئة";
+"category.new" = "فئة جديدة";
+"category.edit" = "تعديل الفئة";
+"category.enter.name" = "أدخل اسم الفئة";
+"category.empty.placeholder" = "يمكن دمج العادات والأحداث\nحسب المعنى";
+"category.delete.confirm" = "هل أنت متأكد أنك لا تحتاج هذه الفئة؟";
+
+// MARK: - Schedule Screen
+"schedule.title" = "الجدول";
+"schedule.everyday" = "كل يوم";
+
+// MARK: - Onboarding
+"onboarding.page1.title" = "تتبع فقط ما تريد";
+"onboarding.page2.title" = "حتى لو لم يكن لترات الماء واليوجا";
+"onboarding.button" = "هذه هي التقنية!";
+
+// MARK: - Days pluralization
+"days.count" = "%d أيام";
+
+// MARK: - Week Days
+"weekday.monday" = "الإثنين";
+"weekday.tuesday" = "الثلاثاء";
+"weekday.wednesday" = "الأربعاء";
+"weekday.thursday" = "الخميس";
+"weekday.friday" = "الجمعة";
+"weekday.saturday" = "السبت";
+"weekday.sunday" = "الأحد";
+
+"weekday.monday.short" = "إث";
+"weekday.tuesday.short" = "ثل";
+"weekday.wednesday.short" = "أرب";
+"weekday.thursday.short" = "خم";
+"weekday.friday.short" = "جم";
+"weekday.saturday.short" = "سب";
+"weekday.sunday.short" = "أحد";
+
+// MARK: - Context Menu
+"context.edit" = "تعديل";
+"context.delete" = "حذف";
+"context.delete.title" = "حذف المتتبع";
+"context.delete.message" = "هل أنت متأكد أنك تريد حذف المتتبع \"%@\"؟";
+"context.delete.error" = "فشل حذف المتتبع";
+
+// MARK: - Filter
+"filter.button" = "تصفية";
+"filter.title" = "تصفية";
+"filter.all" = "جميع المتتبعات";
+"filter.today" = "متتبعات اليوم";
+"filter.completed" = "المكتملة";
+"filter.uncompleted" = "غير المكتملة";
+"filter.empty" = "لم يتم العثور على شيء";

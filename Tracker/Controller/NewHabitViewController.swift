@@ -63,6 +63,7 @@ final class NewHabitViewController: UIViewController {
     private var selectedSchedule: Set<WeekDay> = []
 
     var onSave: ((TrackerModel) -> Void)?
+    var editingTracker: TrackerModel?
 
     // MARK: - Public Properties
     var currentSelectedCategory: String? {
@@ -76,7 +77,13 @@ final class NewHabitViewController: UIViewController {
         setupUI()
         configureNavigationBar()
         setupDelegates()
-        setDefaultSelections()
+        
+        if let tracker = editingTracker {
+            title = "Редактирование привычки"
+            loadTrackerData(tracker)
+        } else {
+            setDefaultSelections()
+        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -106,7 +113,12 @@ final class NewHabitViewController: UIViewController {
             .font: AppTextStyles.medium16,
             .foregroundColor: UIColor(resource: .ypBlack)
         ]
-        title = "Новая привычка"
+        
+        if editingTracker != nil {
+            title = "Редактирование привычки"
+        } else {
+            title = LocalizableKeys.newHabitTitle
+        }
 
         let navigationBarAppearance = UINavigationBarAppearance()
         navigationBarAppearance.configureWithOpaqueBackground()
@@ -130,6 +142,24 @@ final class NewHabitViewController: UIViewController {
 
         emojiSectionView.setSelectedEmoji("📱")
         colorSectionView.setSelectedColor(MockData.colors.first)
+    }
+    
+    private func loadTrackerData(_ tracker: TrackerModel) {
+        titleSectionView.setText(tracker.title)
+        
+        selectedSchedule = Set(tracker.schedule)
+        updateScheduleButtonTitle()
+        
+        emojiSectionView.setSelectedEmoji(tracker.emoji)
+        
+        if let color = MockData.colors.first(where: { UIColor(named: tracker.color) == $0 }) {
+            colorSectionView.setSelectedColor(color)
+        }
+        
+        selectedCategory = "Важная категория"
+        updateCategoryButtonTitle()
+        
+        updateCreateButtonState()
     }
 
     // MARK: - Setup Components
@@ -243,9 +273,11 @@ final class NewHabitViewController: UIViewController {
 
     private func updateScheduleButtonTitle() {
         guard let titleLabel = scheduleTitleLabel else { return }
-
+        
         let scheduleText = getScheduleText()
-        let fullText = scheduleText == "Расписание" || scheduleText.isEmpty ? "Расписание" : "Расписание\n\(scheduleText)"
+        let fullText = scheduleText == LocalizableKeys.newHabitSchedule || scheduleText.isEmpty
+            ? LocalizableKeys.newHabitSchedule
+            : "\(LocalizableKeys.newHabitSchedule)\n\(scheduleText)"
 
         let attributedText = NSAttributedStringBuilder.buildScheduleText(
             fullText: fullText,
@@ -262,8 +294,9 @@ final class NewHabitViewController: UIViewController {
     private func updateCategoryButtonTitle() {
         guard let titleLabel = categoryTitleLabel else { return }
 
-        let fullText = selectedCategory == nil || selectedCategory?
-            .isEmpty == true ? "Категория" : "Категория\n\(selectedCategory!)"
+        let fullText = selectedCategory == nil || selectedCategory?.isEmpty == true
+            ? LocalizableKeys.newHabitCategory
+            : "\(LocalizableKeys.newHabitCategory)\n\(selectedCategory!)"
 
         let attributedText = NSAttributedStringBuilder.buildScheduleText(
             fullText: fullText,
@@ -279,9 +312,9 @@ final class NewHabitViewController: UIViewController {
 
     private func getScheduleText() -> String {
         if selectedSchedule.count == WeekDay.allCases.count {
-            return "Каждый день"
+            return LocalizableKeys.scheduleEveryday
         } else if selectedSchedule.isEmpty {
-            return "Расписание"
+            return LocalizableKeys.newHabitSchedule
         } else {
             let order: [WeekDay] = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
             let sortedDays = order.compactMap { day in
@@ -357,7 +390,7 @@ extension NewHabitViewController {
         let label = UILabel()
         label.numberOfLines = 2
         label.lineBreakMode = .byWordWrapping
-        label.text = "Категория"
+        label.text = LocalizableKeys.newHabitCategory
         categoryTitleLabel = label
 
         let arrow = UIImageView(image: UIImage(systemName: "chevron.right")?.withRenderingMode(.alwaysTemplate))
@@ -400,7 +433,7 @@ extension NewHabitViewController {
         let label = UILabel()
         label.numberOfLines = 2
         label.lineBreakMode = .byWordWrapping
-        label.text = "Расписание"
+        label.text = LocalizableKeys.newHabitSchedule
         scheduleTitleLabel = label
 
         let arrow = UIImageView(image: UIImage(systemName: "chevron.right")?.withRenderingMode(.alwaysTemplate))
@@ -467,7 +500,7 @@ extension NewHabitViewController {
         let colorName = MockData.getColorName(for: color) ?? "ColorSelection1"
 
         let tracker = TrackerModel(
-            id: UUID(),
+            id: editingTracker?.id ?? UUID(),
             title: title,
             color: colorName,
             emoji: emoji,

@@ -37,13 +37,13 @@ final class ActionButtonsView: UIView {
     
     private func setupCancelButton() {
         var cancelConfig = UIButton.Configuration.plain()
-        cancelConfig.title = "Отменить"
+        cancelConfig.title = LocalizableKeys.cancel
         cancelConfig.baseForegroundColor = UIColor(resource: .ypRed)
         cancelConfig.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
         
         cancelConfig.attributedTitle = AttributedString(
             AppTextStyles.attributed(
-                "Отменить",
+                LocalizableKeys.cancel,
                 style: AppTextStyles.medium16,
                 color: UIColor(resource: .ypRed)
             )
@@ -60,8 +60,8 @@ final class ActionButtonsView: UIView {
     }
     
     private func setupCreateButton() {
-        createButton.setTitle("Создать", for: .normal)
-        createButton.setTitleColor(.white, for: .normal)
+        createButton.setTitle(LocalizableKeys.newHabitCreate, for: .normal)
+        createButton.setTitleColor(UIColor(resource: .ypWhite), for: .normal) 
         createButton.titleLabel?.font = AppTextStyles.medium16
         createButton.backgroundColor = UIColor(resource: .ypGray)
         createButton.layer.cornerRadius = 16

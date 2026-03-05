@@ -61,8 +61,7 @@ final class TrackerCell: UICollectionViewCell {
         titleLabel.text = tracker.title
 
         let word = daysText(for: completionCount)
-        counterLabel.text = "\(completionCount) \(word)"
-
+        counterLabel.text = LocalizableKeys.daysCount(completionCount)
         updateButtonAppearance()
 
         completeButton.isEnabled = !isFutureDate
@@ -84,17 +83,17 @@ final class TrackerCell: UICollectionViewCell {
         coloredContainer.clipsToBounds = true
         coloredContainer.translatesAutoresizingMaskIntoConstraints = false
 
-        bottomContainer.backgroundColor = .white
+        bottomContainer.backgroundColor = UIColor(resource: .ypWhite)
         bottomContainer.layer.cornerRadius = 0
         bottomContainer.clipsToBounds = true
         bottomContainer.translatesAutoresizingMaskIntoConstraints = false
 
         emojiLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        emojiLabel.textColor = UIColor(resource: .ypBlack)
+        emojiLabel.textColor = UIColor(resource: .ypWhite)
         emojiLabel.textAlignment = .center
         emojiLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        emojiBackgroundView.backgroundColor = UIColor.white.withAlphaComponent(0.3)
+        emojiBackgroundView.backgroundColor = UIColor(resource: .ypWhite).withAlphaComponent(0.3)
         emojiBackgroundView.layer.cornerRadius = 12
         emojiBackgroundView.clipsToBounds = true
         emojiBackgroundView.translatesAutoresizingMaskIntoConstraints = false
@@ -108,7 +107,7 @@ final class TrackerCell: UICollectionViewCell {
         ])
 
         titleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        titleLabel.textColor = .white
+        titleLabel.textColor = UIColor(resource: .ypWhite)
         titleLabel.numberOfLines = 2
         titleLabel.lineBreakMode = .byWordWrapping
         titleLabel.translatesAutoresizingMaskIntoConstraints = false

@@ -17,7 +17,7 @@ final class ScheduleViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Расписание"
+        title = LocalizableKeys.scheduleTitle
         view.backgroundColor = UIColor(resource: .ypWhite)
         navigationItem.hidesBackButton = true
         setupNavigationTitle()
@@ -51,8 +51,8 @@ final class ScheduleViewController: UIViewController {
         tableView.isScrollEnabled = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
 
-        doneButton.setTitle("Готово", for: .normal)
-        doneButton.setTitleColor(.white, for: .normal)
+        doneButton.setTitle(LocalizableKeys.done, for: .normal)
+        doneButton.setTitleColor(UIColor(resource: .ypWhite), for: .normal)
         doneButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         doneButton.backgroundColor = UIColor(resource: .ypBlack)
         doneButton.layer.cornerRadius = 16
